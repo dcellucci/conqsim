@@ -16,13 +16,11 @@ var start_transform = transform
 var delta_factor = 0
 
 func _init() -> void:
-	print("Hello, world!")
-	print(texture.get_width())
 	transform = transform.scaled_local(Vector2(stand_scale, stand_scale))
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+
 func _process(delta: float) -> void:
 	var direction = 0
-	print(current_move_state)
+	
 	if current_move_state == MoveState.IDLE:
 		if Input.is_key_pressed(KEY_W):	
 			current_move_state = MoveState.FORWARD
@@ -63,6 +61,7 @@ func _process(delta: float) -> void:
 		delta_factor += angular_velocity * delta
 		if delta_factor > 0: 
 			delta_factor = 0
+		print(delta_factor, position)
 		transform = wheel(start_transform, delta_factor, 1)
 		
 	'''
@@ -93,4 +92,4 @@ func wheel(starting_transform: Transform2D, amount:float,direction:int) -> Trans
 			texture.get_width()/2*stand_scale
 		  , texture.get_height()/2*stand_scale
 		  )
-	return starting_transform.translated(-position).rotated(-rotation).translated(disp_vec).rotated(amount).translated(-disp_vec).rotated(rotation).translated(position)
+	return starting_transform.translated_local(-disp_vec).rotated_local(amount).translated_local(disp_vec)
