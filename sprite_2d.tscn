@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://cf46pkuwuusr1"]
+
+[ext_resource type="Texture2D" uid="uid://cxhm8xg5x13fg" path="res://icon.svg" id="1_wv132"]
+[ext_resource type="Script" path="res://sprite_2d.gd" id="2_l47k3"]
+
+[node name="Label" type="Label"]
+offset_left = -63.0
+offset_top = -57.0
+offset_right = -23.0
+offset_bottom = -34.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(583, 329)
+texture = ExtResource("1_wv132")
+script = ExtResource("2_l47k3")
