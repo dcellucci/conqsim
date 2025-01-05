@@ -28,6 +28,7 @@ text = "T
 script = ExtResource("3_tgq5g")
 
 [node name="TestRegiment" parent="." instance=ExtResource("2_dfxmq")]
+z_index = 3
 position = Vector2(549, 309)
 
 [connection signal="update_total_move" from="TestRegiment" to="." method="_on_update_total_move"]

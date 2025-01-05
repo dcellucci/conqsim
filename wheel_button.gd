@@ -4,11 +4,12 @@ var original_position = Vector2(0,0)
 var pivot_position = Vector2(0,0)
 
 enum { NONE, ROTATING}
-
 var state = NONE
 var mouse_on_me: bool = false
 var initial_mouse_pos: Vector2
 var initial_angle: float
+
+signal set_wheeling(direction, value)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -24,11 +25,14 @@ func _input(event):
 		# mouse's position when it is clicked and should stay put when not 
 		# being clicked
 		if event.is_pressed():
+			#Left is 0, we are wheeling
+			set_wheeling.emit(0, true)
 			initial_angle = rotation
 			initial_mouse_pos = get_local_mouse_position().rotated(rotation)
 			state = ROTATING
 			print("I'm being dragged")
 		else:
+			set_wheeling.emit(0,false)
 			state=NONE
 			print("I'm no longer being dragged")
 			
@@ -36,7 +40,7 @@ func _input(event):
 		if state == ROTATING:
 			var current_mouse_pos: Vector2 = get_local_mouse_position().rotated(rotation)
 			var angle = pivot_position.angle_to(current_mouse_pos)
-			print(current_mouse_pos, angle + initsial_angle)
+			print(current_mouse_pos, angle + initial_angle)
 
 func _on_Area2D_mouse_entered() -> void:
 	mouse_on_me = true

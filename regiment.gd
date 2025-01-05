@@ -25,8 +25,8 @@ func _init() -> void:
 	pass#transform = transform.scaled_local(Vector2(stand_scale, stand_scale))
 
 func _ready() -> void:
-	var bbox = get_node("BoundingBox")
-	bbox.shape.set_size(regiment_size)
+	$BoundingBox.shape.set_size(regiment_size)
+	# Add the unit sprites
 	var unit = $Unit
 	for row in range(num_stands_tall):
 		for col in range(num_stands_wide):
@@ -34,12 +34,23 @@ func _ready() -> void:
 			copyunit.visible = true
 			copyunit.position = Vector2((col-num_stands_wide/2)*stand_size_pixels, (row-num_stands_tall/2)*stand_size_pixels)
 			self.add_child(copyunit)
+	# Position the wheel left button
 	var wheel_left_button = $WheelLeftButton
-	wheel_left_button.position = Vector2((num_stands_wide/2+0.5)*stand_size_pixels+wheel_left_button.get_rect().size.x/2, -(num_stands_tall/2)*stand_size_pixels)
+	wheel_left_button.position = Vector2(
+		(num_stands_wide/2+0.5)*stand_size_pixels+wheel_left_button.get_rect().size.x/2
+	 , -(num_stands_tall/2)*stand_size_pixels-wheel_left_button.get_rect().size.y/2
+	 )
 	wheel_left_button.pivot_position = Vector2(-(num_stands_wide/2)*stand_size_pixels, -(num_stands_tall/2)*stand_size_pixels)
-	#var wheel_right_button = $Control/WheelRightButton
-	#wheel_right_button.position = Vector2(-(num_stands_wide/2+0.5)*stand_size_pixels, (num_stands_tall/2)*stand_size_pixels)
-
+	
+	var wheel_left_pivot = $WheelLeftPivot
+	wheel_left_pivot.visible = false
+	wheel_left_pivot.position = Vector2(	
+	   -(num_stands_wide/2+0.5)*stand_size_pixels-wheel_left_pivot.get_rect().size.x/2
+	 , -(num_stands_tall/2+0.5)*stand_size_pixels-wheel_left_pivot.get_rect().size.y/2
+	 )
+	
+	$DebugStartAngleLine.visible = false
+	$DebugStartAngleLine.scale=Vector2(num_stands_wide*stand_size_pixels/20, 0.1)
 	
 func _process(delta: float) -> void:
 	var direction = 0
@@ -113,6 +124,20 @@ func _process(delta: float) -> void:
 # we then confirm, goes back to an IDLE where we then can choose a new mode
 # label that shows total distance travelled
 # also a set of vectors illustrating the movement??	
+
+func _receive_set_wheeling(direction, status:bool):
+	$WheelLeftPivot.visible = status
+	$DebugStartAngleLine.visible = status
+	if status == true:
+		current_move_state = MoveState.WHEEL_LEFT
+		start_transform = transform
+		var start_position = get_local_mouse_position()
+		var pivot_to_start_vector = $WheelLeftPivot.position - start_position
+		$DebugStartAngleLine.rotation = Vector2(1,0).angle_to(pivot_to_start_vector)
+		$DebugStartAngleLine.position = ($WheelLeftPivot.position + start_position)/2
+		$DebugStartAngleLine.z_index = 5
+	if status == false:
+		current_move_state = MoveState.IDLE
 
 
 func wheel(starting_transform: Transform2D, amount:float, direction:int) -> Transform2D:
