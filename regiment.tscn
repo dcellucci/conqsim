@@ -1,8 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://c5cii5i2h68xo"]
+[gd_scene load_steps=10 format=3 uid="uid://c5cii5i2h68xo"]
 
 [ext_resource type="Script" path="res://regiment.gd" id="1_sqsrb"]
 [ext_resource type="PackedScene" uid="uid://cdwy8aj77yu32" path="res://unit.tscn" id="2_krtoi"]
 [ext_resource type="Script" path="res://wheel_button.gd" id="3_w0knh"]
+[ext_resource type="Script" path="res://move_button.gd" id="4_0yk1q"]
+[ext_resource type="Script" path="res://move_forward_button.gd" id="5_knjt4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pqu2b"]
 size = Vector2(100, 200)
@@ -11,6 +13,8 @@ size = Vector2(100, 200)
 size = Vector2(40, 40)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_0jtwv"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_6ujr4"]
 
 [node name="Regiment" type="Area2D"]
 script = ExtResource("1_sqsrb")
@@ -25,6 +29,10 @@ visible = false
 texture = SubResource("PlaceholderTexture2D_des6n")
 script = ExtResource("3_w0knh")
 
+[node name="OldMoveForwardButton" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_des6n")
+script = ExtResource("4_0yk1q")
+
 [node name="WheelLeftPivot" type="Sprite2D" parent="."]
 position = Vector2(-55, -24)
 scale = Vector2(4.777, 5)
@@ -33,4 +41,15 @@ texture = SubResource("PlaceholderTexture2D_0jtwv")
 [node name="DebugStartAngleLine" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-10, -5, 10, -5, 10, 5, -10, 5)
 
+[node name="MoveForwardButton" type="Button" parent="."]
+offset_left = 50.0
+offset_right = 78.0
+offset_bottom = 31.0
+icon = SubResource("PlaceholderTexture2D_6ujr4")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("5_knjt4")
+
 [connection signal="set_wheeling" from="WheelLeftButton" to="." method="_receive_set_wheeling"]
+[connection signal="set_moving" from="OldMoveForwardButton" to="." method="_receive_set_moving"]
+[connection signal="pressed" from="MoveForwardButton" to="." method="_on_move_forward_button_pressed"]

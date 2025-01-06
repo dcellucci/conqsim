@@ -20,6 +20,7 @@ var movelist = []
 var start_position = position
 var start_transform = transform
 var delta_factor = 0
+var move_start_position = position 
 
 func _init() -> void:
 	pass#transform = transform.scaled_local(Vector2(stand_scale, stand_scale))
@@ -49,6 +50,11 @@ func _ready() -> void:
 	 , -(num_stands_tall/2+0.5)*stand_size_pixels-wheel_left_pivot.get_rect().size.y/2
 	 )
 	
+	$MoveForwardButton.position = Vector2(
+	  -$MoveForwardButton.get_rect().size.x/2
+	, -(num_stands_tall/2+0.5)*stand_size_pixels-$MoveForwardButton.get_rect().size.y
+	)
+	
 	$DebugStartAngleLine.visible = false
 	$DebugStartAngleLine.scale=Vector2(num_stands_wide*stand_size_pixels/20, 0.1)
 	
@@ -68,21 +74,15 @@ func _process(delta: float) -> void:
 			start_transform = transform
 	
 	if current_move_state == MoveState.FORWARD:
-		var velocity = 0
-		if Input.is_key_pressed(KEY_W):
-			velocity = speed
-		if Input.is_key_pressed(KEY_S):
-			velocity = -speed
 		if Input.is_key_pressed(KEY_ENTER):
 			current_move_state = MoveState.IDLE
 			total_move += delta_factor
 			start_position = position
 			delta_factor = 0
-		delta_factor += velocity * delta
-		if delta_factor < 0:
-			delta_factor = 0
-		position = start_position + Vector2.UP.rotated(rotation)*delta_factor
-		update_total_move.emit((total_move+delta_factor)/pixels_per_inch)
+		print(get_local_mouse_position(), move_start_position)
+		var disp_vec = Vector2(0, get_local_mouse_position().y - move_start_position.y)
+		transform = start_transform.translated_local(disp_vec)
+		#update_total_move.emit((total_move+delta_factor)/pixels_per_inch)
 	
 	if current_move_state == MoveState.WHEEL_LEFT:
 		var angular_velocity = 0 
@@ -153,3 +153,10 @@ func wheel(starting_transform: Transform2D, amount:float, direction:int) -> Tran
 		  , reg_height/2
 		  )
 	return starting_transform.translated_local(-disp_vec).rotated_local(amount).translated_local(disp_vec)
+
+
+func _on_move_forward_button_pressed() -> void:
+	if current_move_state == MoveState.IDLE:
+		current_move_state = MoveState.FORWARD
+		start_transform = transform
+		move_start_position = get_local_mouse_position()
