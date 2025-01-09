@@ -25,7 +25,7 @@ shape = SubResource("RectangleShape2D_pqu2b")
 [node name="Unit" parent="." instance=ExtResource("2_krtoi")]
 visible = false
 
-[node name="WheelLeftButton" type="Sprite2D" parent="."]
+[node name="OldWheelLeftButton" type="Sprite2D" parent="."]
 texture = SubResource("PlaceholderTexture2D_des6n")
 script = ExtResource("3_w0knh")
 
@@ -41,6 +41,15 @@ texture = SubResource("PlaceholderTexture2D_0jtwv")
 [node name="DebugStartAngleLine" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-10, -5, 10, -5, 10, 5, -10, 5)
 
+[node name="WheelLeftButton" type="Button" parent="."]
+offset_left = 100.0
+offset_right = 128.0
+offset_bottom = 31.0
+icon = SubResource("PlaceholderTexture2D_6ujr4")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("5_knjt4")
+
 [node name="MoveForwardButton" type="Button" parent="."]
 offset_left = 50.0
 offset_right = 78.0
@@ -50,6 +59,17 @@ icon_alignment = 1
 expand_icon = true
 script = ExtResource("5_knjt4")
 
-[connection signal="set_wheeling" from="WheelLeftButton" to="." method="_receive_set_wheeling"]
+[node name="WheelRightButton" type="Button" parent="."]
+offset_left = 200.0
+offset_right = 228.0
+offset_bottom = 31.0
+icon = SubResource("PlaceholderTexture2D_6ujr4")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("5_knjt4")
+
+[connection signal="set_wheeling" from="OldWheelLeftButton" to="." method="_receive_set_wheeling"]
 [connection signal="set_moving" from="OldMoveForwardButton" to="." method="_receive_set_moving"]
+[connection signal="pressed" from="WheelLeftButton" to="." method="_on_wheel_left_button_pressed"]
 [connection signal="pressed" from="MoveForwardButton" to="." method="_on_move_forward_button_pressed"]
+[connection signal="pressed" from="WheelRightButton" to="." method="_on_wheel_right_button_pressed"]

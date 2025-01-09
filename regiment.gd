@@ -21,6 +21,9 @@ var start_position = position
 var start_transform = transform
 var delta_factor = 0
 var move_start_position = position 
+var pivot_location = position
+
+
 
 func _init() -> void:
 	pass#transform = transform.scaled_local(Vector2(stand_scale, stand_scale))
@@ -37,11 +40,15 @@ func _ready() -> void:
 			self.add_child(copyunit)
 	# Position the wheel left button
 	var wheel_left_button = $WheelLeftButton
-	wheel_left_button.position = Vector2(
-		(num_stands_wide/2+0.5)*stand_size_pixels+wheel_left_button.get_rect().size.x/2
+	$WheelLeftButton.position = Vector2(
+		(num_stands_wide/2+0.5)*stand_size_pixels#+wheel_left_button.get_rect().size.x/2
 	 , -(num_stands_tall/2)*stand_size_pixels-wheel_left_button.get_rect().size.y/2
 	 )
-	wheel_left_button.pivot_position = Vector2(-(num_stands_wide/2)*stand_size_pixels, -(num_stands_tall/2)*stand_size_pixels)
+	$WheelRightButton.position = Vector2(
+	   -(num_stands_wide/2+0.5)*stand_size_pixels-wheel_left_button.get_rect().size.x
+	 , -(num_stands_tall/2)*stand_size_pixels-wheel_left_button.get_rect().size.y/2
+	 )
+	#wheel_left_button.pivot_position = Vector2(-(num_stands_wide/2)*stand_size_pixels, -(num_stands_tall/2)*stand_size_pixels)
 	
 	var wheel_left_pivot = $WheelLeftPivot
 	wheel_left_pivot.visible = false
@@ -74,71 +81,73 @@ func _process(delta: float) -> void:
 			start_transform = transform
 	
 	if current_move_state == MoveState.FORWARD:
-		if Input.is_key_pressed(KEY_ENTER):
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			print("Done Moving.")
 			current_move_state = MoveState.IDLE
-			total_move += delta_factor
-			start_position = position
-			delta_factor = 0
-		print(get_local_mouse_position(), move_start_position)
-		var disp_vec = Vector2(0, get_local_mouse_position().y - move_start_position.y)
+			$MoveForwardButton.disabled = false
+		var mouse_vec = start_transform.basis_xform_inv(get_global_mouse_position())
+		#print(mouse_vec, get_local_mouse_position(), move_start_position)
+		var disp_vec = Vector2(0, mouse_vec.y - move_start_position.y)
+		if Input.is_action_pressed("SnapMovement"):
+			disp_vec = Vector2(0,  round_delta_factor_to_nearest_increment(disp_vec.y, 1.*pixels_per_inch))
+			print(disp_vec)
 		transform = start_transform.translated_local(disp_vec)
-		#update_total_move.emit((total_move+delta_factor)/pixels_per_inch)
+		update_total_move.emit((total_move-disp_vec.y)/pixels_per_inch)
 	
 	if current_move_state == MoveState.WHEEL_LEFT:
-		var angular_velocity = 0 
-		if Input.is_key_pressed(KEY_Q):		
-			angular_velocity = -angular_speed
-		if Input.is_key_pressed(KEY_A):
-			angular_velocity = angular_speed
-		if Input.is_key_pressed(KEY_ENTER):
-			current_move_state = MoveState.IDLE
-			total_move += abs(delta_factor)*num_stands_wide*stand_size_inches*pixels_per_inch
-			start_transform = wheel(start_transform, delta_factor, 1)
-			delta_factor = 0
-		delta_factor += angular_velocity * delta
-		if delta_factor > 0: 
-			delta_factor = 0
+		var mouse_vec= get_global_mouse_position()
+		#The delta factor in a wheel is the angle difference between the start vector
+		#and the current mouse position vector, relative to the pivot point (front corner)
+		delta_factor = (move_start_position-pivot_location).angle_to(mouse_vec-pivot_location)
+		#We can also snap to the nearest value
+		if Input.is_action_pressed("SnapMovement"):
+			#find the angle that corresponds to 1 inch
+			#maybe make the increment alterable in the future			
+			var increment = 1./(num_stands_wide*stand_size_inches)
+			#round the delta factor value to the nearest increment
+			delta_factor = round_delta_factor_to_nearest_increment(delta_factor, increment)
 		transform = wheel(start_transform, delta_factor, 1)
 		update_total_move.emit(total_move/pixels_per_inch+abs(delta_factor)*num_stands_wide*stand_size_inches)
-		
-	if current_move_state == MoveState.WHEEL_RIGHT:
-		var angular_velocity = 0 
-		var delta_transform = transform 
-		if Input.is_key_pressed(KEY_E):		
-			angular_velocity = angular_speed
-		if Input.is_key_pressed(KEY_D):
-			angular_velocity = -angular_speed
-		if Input.is_key_pressed(KEY_ENTER):
+		# A click when in a move mode ends the movement
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			print("Done Wheeling Left.")
+			# Reenable the button, so we can click it again later
+			$WheelLeftButton.disabled = false
+			# go back to the IDLE state to await movement requests
 			current_move_state = MoveState.IDLE
+			#update the total move value 
 			total_move += abs(delta_factor)*num_stands_wide*stand_size_inches*pixels_per_inch
-			start_transform = wheel(start_transform, delta_factor, -1)
-			delta_factor = 0
-		delta_factor += angular_velocity * delta
-		if delta_factor < 0: 
-			delta_factor = 0
+	
+	if current_move_state == MoveState.WHEEL_RIGHT:
+		var mouse_vec= get_global_mouse_position()#start_transform.basis_xform_inv(get_global_mouse_position())
+		delta_factor = (move_start_position-pivot_location).angle_to(mouse_vec-pivot_location)
+		#We can also snap to the nearest value
+		if Input.is_action_pressed("SnapMovement"):
+			#find the angle that corresponds to 1 inch
+			#maybe make the increment alterable in the future			
+			var increment = 1./(num_stands_wide*stand_size_inches)
+			#round the delta factor value to the nearest increment
+			delta_factor = round_delta_factor_to_nearest_increment(delta_factor, increment)
 		transform = wheel(start_transform, delta_factor, -1)
 		update_total_move.emit(total_move/pixels_per_inch+abs(delta_factor)*num_stands_wide*stand_size_inches)
-
+		# A click when in a move mode ends the movement
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			print("Done Wheeling Right.")
+			# Reenable the button, so we can click it again later
+			$WheelRightButton.disabled = false
+			# go back to the IDLE state to await movement requests
+			current_move_state = MoveState.IDLE
+			#update the total move value 
+			total_move += abs(delta_factor)*num_stands_wide*stand_size_inches*pixels_per_inch
 	
 # We want a keypress to take us into a mode, where we can then increase/decrease the value
 # we then confirm, goes back to an IDLE where we then can choose a new mode
 # label that shows total distance travelled
 # also a set of vectors illustrating the movement??	
 
-func _receive_set_wheeling(direction, status:bool):
-	$WheelLeftPivot.visible = status
-	$DebugStartAngleLine.visible = status
-	if status == true:
-		current_move_state = MoveState.WHEEL_LEFT
-		start_transform = transform
-		var start_position = get_local_mouse_position()
-		var pivot_to_start_vector = $WheelLeftPivot.position - start_position
-		$DebugStartAngleLine.rotation = Vector2(1,0).angle_to(pivot_to_start_vector)
-		$DebugStartAngleLine.position = ($WheelLeftPivot.position + start_position)/2
-		$DebugStartAngleLine.z_index = 5
-	if status == false:
-		current_move_state = MoveState.IDLE
-
+func round_delta_factor_to_nearest_increment(delta_factor: float, increment:float):
+	var fractional_value = delta_factor/increment
+	return round(fractional_value)*increment
 
 func wheel(starting_transform: Transform2D, amount:float, direction:int) -> Transform2D:
 	var reg_width = stand_size_inches*num_stands_wide*pixels_per_inch
@@ -157,6 +166,40 @@ func wheel(starting_transform: Transform2D, amount:float, direction:int) -> Tran
 
 func _on_move_forward_button_pressed() -> void:
 	if current_move_state == MoveState.IDLE:
+		$MoveForwardButton.disabled = true
+		print("Moving")
 		current_move_state = MoveState.FORWARD
 		start_transform = transform
-		move_start_position = get_local_mouse_position()
+		move_start_position = start_transform.basis_xform_inv(get_global_mouse_position())
+
+
+func _on_wheel_left_button_pressed() -> void:
+	if current_move_state == MoveState.IDLE:
+		$WheelLeftButton.disabled = true
+		print("Wheeling Left")
+		current_move_state = MoveState.WHEEL_LEFT
+		start_transform = transform
+		move_start_position = get_global_mouse_position()#get_local_mouse_position()#start_transform.basis_xform_inv(get_global_mouse_position())
+		var reg_width = stand_size_inches*num_stands_wide*pixels_per_inch
+		var reg_height = stand_size_inches*num_stands_tall*pixels_per_inch
+		pivot_location = Vector2(	
+			   -reg_width/2
+			 , -reg_height/2
+			 )
+		pivot_location = to_global(pivot_location)
+
+
+func _on_wheel_right_button_pressed() -> void:
+	if current_move_state == MoveState.IDLE:
+		$WheelRightButton.disabled = true
+		print("Wheeling Right")
+		current_move_state = MoveState.WHEEL_RIGHT
+		start_transform = transform
+		move_start_position = get_global_mouse_position()#get_local_mouse_position()#start_transform.basis_xform_inv(get_global_mouse_position())
+		var reg_width = stand_size_inches*num_stands_wide*pixels_per_inch
+		var reg_height = stand_size_inches*num_stands_tall*pixels_per_inch
+		pivot_location = Vector2(	
+				reg_width/2
+			 , -reg_height/2
+			 )
+		pivot_location = to_global(pivot_location) # Replace with function body.
