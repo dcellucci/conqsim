@@ -13,6 +13,7 @@ size = Vector2(100, 200)
 script = ExtResource("1_sqsrb")
 
 [node name="BoundingBox" type="CollisionShape2D" parent="."]
+top_level = true
 position = Vector2(8, -1)
 shape = SubResource("RectangleShape2D_pqu2b")
 
@@ -102,6 +103,22 @@ rotation = -1.5708
 bbcode_enabled = true
 text = "[center]Side[/center]"
 
+[node name="SelectionRect" type="ReferenceRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_right = 50.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+border_color = Color(0, 0.546802, 0.931379, 1)
+border_width = 3.0
+editor_only = false
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
 [connection signal="pressed" from="WheelLeftButton" to="." method="_on_wheel_left_button_pressed"]
 [connection signal="pressed" from="MoveForwardButton" to="." method="_on_move_forward_button_pressed"]
 [connection signal="pressed" from="WheelRightButton" to="." method="_on_wheel_right_button_pressed"]

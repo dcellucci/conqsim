@@ -23,6 +23,7 @@ var delta_factor = 0
 var move_start_position = position 
 var pivot_location = position
 
+var selection_stroke = 3
 
 
 func _init() -> void:
@@ -121,6 +122,16 @@ func _ready() -> void:
 		50
 	  , 0.5
 	  )
+	
+	$SelectionRect.size = Vector2(
+		num_stands_wide*stand_size_pixels+selection_stroke
+	  , num_stands_tall*stand_size_pixels+selection_stroke
+	  )
+	$SelectionRect.position = Vector2(
+		-(num_stands_wide/2.0)*stand_size_pixels-selection_stroke/2.0
+	  , -(num_stands_tall/2.0)*stand_size_pixels-selection_stroke/2.0
+	  )
+	$SelectionRect.visible = false
 	
 func _process(delta: float) -> void:
 	var direction = 0
@@ -248,3 +259,11 @@ func _on_wheel_right_button_pressed() -> void:
 			 , -reg_height/2
 			 )
 		pivot_location = to_global(pivot_location) # Replace with function body.
+
+
+
+func _on_mouse_entered() -> void:
+	$SelectionRect.visible=true
+
+func _on_mouse_exited() -> void:
+	$SelectionRect.visible=false
