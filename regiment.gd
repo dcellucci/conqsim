@@ -4,11 +4,11 @@ signal update_total_move(new_total_move)
 var speed = 400
 var angular_speed = PI
 var total_move = 0
-var pixels_per_inch = 30
+var pixels_per_inch = 30.
 var stand_size_inches = 2.5
 var stand_size_pixels = stand_size_inches*pixels_per_inch
-var num_stands_wide = 3
-var num_stands_tall = 3
+var num_stands_wide = 4.
+var num_stands_tall = 3.
 
 var regiment_size = Vector2(num_stands_wide*stand_size_pixels,num_stands_tall*stand_size_pixels)
 #var stand_scale = stand_size_inches*pixels_per_inch/texture.get_width()
@@ -36,49 +36,94 @@ func _ready() -> void:
 		for col in range(num_stands_wide):
 			var copyunit = unit.duplicate()
 			copyunit.visible = true
-			copyunit.position = Vector2((col-num_stands_wide/2)*stand_size_pixels, (row-num_stands_tall/2)*stand_size_pixels)
+			copyunit.position = Vector2(
+				(col-num_stands_wide/2.0+0.5)*stand_size_pixels
+			  , (row-num_stands_tall/2.0+0.5)*stand_size_pixels
+			  )
 			self.add_child(copyunit)
 	# Position the wheel left button
 	var wheel_left_button = $WheelLeftButton
 	$WheelLeftButton.position = Vector2(
-		(num_stands_wide/2+0.5)*stand_size_pixels#+wheel_left_button.get_rect().size.x/2
-	 , -(num_stands_tall/2)*stand_size_pixels-wheel_left_button.get_rect().size.y/2
+		(num_stands_wide/2.0)*stand_size_pixels#+wheel_left_button.get_rect().size.x/2
+	 , -(num_stands_tall/2.0)*stand_size_pixels
 	 )
 	$WheelRightButton.position = Vector2(
-	   -(num_stands_wide/2+0.5)*stand_size_pixels-wheel_left_button.get_rect().size.x
-	 , -(num_stands_tall/2)*stand_size_pixels-wheel_left_button.get_rect().size.y/2
-	 )
-	#wheel_left_button.pivot_position = Vector2(-(num_stands_wide/2)*stand_size_pixels, -(num_stands_tall/2)*stand_size_pixels)
-	
-	var wheel_left_pivot = $WheelLeftPivot
-	wheel_left_pivot.visible = false
-	wheel_left_pivot.position = Vector2(	
-	   -(num_stands_wide/2+0.5)*stand_size_pixels-wheel_left_pivot.get_rect().size.x/2
-	 , -(num_stands_tall/2+0.5)*stand_size_pixels-wheel_left_pivot.get_rect().size.y/2
+	   -(num_stands_wide/2.0)*stand_size_pixels-wheel_left_button.get_rect().size.x
+	 , -(num_stands_tall/2.0)*stand_size_pixels
 	 )
 	
 	$MoveForwardButton.position = Vector2(
 	  -$MoveForwardButton.get_rect().size.x/2
-	, -(num_stands_tall/2+0.5)*stand_size_pixels-$MoveForwardButton.get_rect().size.y
+	, -(num_stands_tall/2.0)*stand_size_pixels-$MoveForwardButton.get_rect().size.y
 	)
 	
-	$DebugStartAngleLine.visible = false
-	$DebugStartAngleLine.scale=Vector2(num_stands_wide*stand_size_pixels/20, 0.1)
+	#$DebugStartAngleLine.visible = false
+	#$DebugStartAngleLine.scale=Vector2(num_stands_wide*stand_size_pixels/20, 0.1)
+	
+	var label_rect = $LineOfSightLabels/FrontLabel.get_rect()
+	$LineOfSightLabels/FrontLabel.position=Vector2(
+		-label_rect.size.x/2.0
+	  , -(num_stands_tall/2.0)*stand_size_pixels-label_rect.size.y-$MoveForwardButton.get_rect().size.y
+	  )
+	label_rect = $LineOfSightLabels/RearLabel.get_rect()
+	$LineOfSightLabels/RearLabel.position=Vector2(
+		-label_rect.size.x/2.0
+	  , (num_stands_tall/2.0)*stand_size_pixels+$MoveForwardButton.get_rect().size.y
+	  )
+	
+	label_rect = $LineOfSightLabels/SideLabel.get_rect()
+	$LineOfSightLabels/SideLabel.position=Vector2(
+		-(num_stands_wide/2.0)*stand_size_pixels-label_rect.size.y-$WheelRightButton.get_rect().size.x
+	  , label_rect.size.x/2
+	  )
+	
+	label_rect = $LineOfSightLabels/SideLabel2.get_rect()
+	$LineOfSightLabels/SideLabel2.position=Vector2(
+		(num_stands_wide/2.0)*stand_size_pixels+label_rect.size.y+$WheelLeftButton.get_rect().size.x
+	  , -label_rect.size.x/2
+	  )
+	$LineOfSightLabels/LOSLine1.rotation=-3.0*PI/4.0
+	$LineOfSightLabels/LOSLine1.position=Vector2(
+		-(num_stands_wide/2.0)*stand_size_pixels
+	  , -(num_stands_tall/2.0)*stand_size_pixels
+	  )
+	$LineOfSightLabels/LOSLine1.scale=Vector2(
+		50
+	  , 0.5
+	  )
+	
+	$LineOfSightLabels/LOSLine2.rotation=-PI/4.0
+	$LineOfSightLabels/LOSLine2.position=Vector2(
+		 (num_stands_wide/2.0)*stand_size_pixels
+	  , -(num_stands_tall/2.0)*stand_size_pixels
+	  )
+	$LineOfSightLabels/LOSLine2.scale=Vector2(
+		50
+	  , 0.5
+	  )
+	
+	$LineOfSightLabels/LOSLine3.rotation=PI/4.0
+	$LineOfSightLabels/LOSLine3.position=Vector2(
+		 (num_stands_wide/2.0)*stand_size_pixels
+	  ,  (num_stands_tall/2.0)*stand_size_pixels
+	  )
+	$LineOfSightLabels/LOSLine3.scale=Vector2(
+		50
+	  , 0.5
+	  )
+	
+	$LineOfSightLabels/LOSLine4.rotation=3.0*PI/4.0
+	$LineOfSightLabels/LOSLine4.position=Vector2(
+		-(num_stands_wide/2.0)*stand_size_pixels
+	  ,  (num_stands_tall/2.0)*stand_size_pixels
+	  )
+	$LineOfSightLabels/LOSLine4.scale=Vector2(
+		50
+	  , 0.5
+	  )
 	
 func _process(delta: float) -> void:
 	var direction = 0
-	
-	if current_move_state == MoveState.IDLE:
-		delta_factor = 0
-		if Input.is_key_pressed(KEY_W):	
-			current_move_state = MoveState.FORWARD
-			start_position = position
-		if Input.is_key_pressed(KEY_Q):	
-			current_move_state = MoveState.WHEEL_LEFT
-			start_transform = transform
-		if Input.is_key_pressed(KEY_E):	
-			current_move_state = MoveState.WHEEL_RIGHT
-			start_transform = transform
 	
 	if current_move_state == MoveState.FORWARD:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
