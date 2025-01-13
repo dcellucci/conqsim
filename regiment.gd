@@ -25,6 +25,8 @@ var pivot_location = position
 
 var selection_stroke = 3
 
+var selected = false
+var hovered = false
 
 func _init() -> void:
 	pass#transform = transform.scaled_local(Vector2(stand_scale, stand_scale))
@@ -42,20 +44,20 @@ func _ready() -> void:
 			  , (row-num_stands_tall/2.0+0.5)*stand_size_pixels
 			  )
 			self.add_child(copyunit)
+	$MoveUI.visible = false
 	# Position the wheel left button
-	var wheel_left_button = $WheelLeftButton
-	$WheelLeftButton.position = Vector2(
+	$MoveUI/WheelLeftButton.position = Vector2(
 		(num_stands_wide/2.0)*stand_size_pixels#+wheel_left_button.get_rect().size.x/2
 	 , -(num_stands_tall/2.0)*stand_size_pixels
 	 )
-	$WheelRightButton.position = Vector2(
-	   -(num_stands_wide/2.0)*stand_size_pixels-wheel_left_button.get_rect().size.x
+	$MoveUI/WheelRightButton.position = Vector2(
+	   -(num_stands_wide/2.0)*stand_size_pixels-$MoveUI/WheelRightButton.get_rect().size.x
 	 , -(num_stands_tall/2.0)*stand_size_pixels
 	 )
 	
-	$MoveForwardButton.position = Vector2(
-	  -$MoveForwardButton.get_rect().size.x/2
-	, -(num_stands_tall/2.0)*stand_size_pixels-$MoveForwardButton.get_rect().size.y
+	$MoveUI/MoveForwardButton.position = Vector2(
+	  -$MoveUI/MoveForwardButton.get_rect().size.x/2
+	, -(num_stands_tall/2.0)*stand_size_pixels-$MoveUI/MoveForwardButton.get_rect().size.y
 	)
 	
 	#$DebugStartAngleLine.visible = false
@@ -64,23 +66,23 @@ func _ready() -> void:
 	var label_rect = $LineOfSightLabels/FrontLabel.get_rect()
 	$LineOfSightLabels/FrontLabel.position=Vector2(
 		-label_rect.size.x/2.0
-	  , -(num_stands_tall/2.0)*stand_size_pixels-label_rect.size.y-$MoveForwardButton.get_rect().size.y
+	  , -(num_stands_tall/2.0)*stand_size_pixels-label_rect.size.y-$MoveUI/MoveForwardButton.get_rect().size.y
 	  )
 	label_rect = $LineOfSightLabels/RearLabel.get_rect()
 	$LineOfSightLabels/RearLabel.position=Vector2(
 		-label_rect.size.x/2.0
-	  , (num_stands_tall/2.0)*stand_size_pixels+$MoveForwardButton.get_rect().size.y
+	  , (num_stands_tall/2.0)*stand_size_pixels+$MoveUI/MoveForwardButton.get_rect().size.y
 	  )
 	
 	label_rect = $LineOfSightLabels/SideLabel.get_rect()
 	$LineOfSightLabels/SideLabel.position=Vector2(
-		-(num_stands_wide/2.0)*stand_size_pixels-label_rect.size.y-$WheelRightButton.get_rect().size.x
+		-(num_stands_wide/2.0)*stand_size_pixels-label_rect.size.y-$MoveUI/WheelRightButton.get_rect().size.x
 	  , label_rect.size.x/2
 	  )
 	
 	label_rect = $LineOfSightLabels/SideLabel2.get_rect()
 	$LineOfSightLabels/SideLabel2.position=Vector2(
-		(num_stands_wide/2.0)*stand_size_pixels+label_rect.size.y+$WheelLeftButton.get_rect().size.x
+		(num_stands_wide/2.0)*stand_size_pixels+label_rect.size.y+$MoveUI/WheelLeftButton.get_rect().size.x
 	  , -label_rect.size.x/2
 	  )
 	$LineOfSightLabels/LOSLine1.rotation=-3.0*PI/4.0
@@ -135,12 +137,21 @@ func _ready() -> void:
 	
 func _process(delta: float) -> void:
 	var direction = 0
-	
+	$MoveUI.visible = selected
+	if current_move_state == MoveState.IDLE:
+		if Input.is_action_just_pressed('Select'):
+			selected = hovered
+			$SelectionRect.visible=hovered
+			if hovered:
+				$SelectionRect.border_color = Color(1.0,0.0,0.0)
+			else:
+				$SelectionRect.border_color = Color(0.0,0.547,0.931)
+
 	if current_move_state == MoveState.FORWARD:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			print("Done Moving.")
 			current_move_state = MoveState.IDLE
-			$MoveForwardButton.disabled = false
+			$MoveUI/MoveForwardButton.disabled = false
 		var mouse_vec = start_transform.basis_xform_inv(get_global_mouse_position())
 		#print(mouse_vec, get_local_mouse_position(), move_start_position)
 		var disp_vec = Vector2(0, mouse_vec.y - move_start_position.y)
@@ -168,7 +179,7 @@ func _process(delta: float) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			print("Done Wheeling Left.")
 			# Reenable the button, so we can click it again later
-			$WheelLeftButton.disabled = false
+			$MoveUI/WheelLeftButton.disabled = false
 			# go back to the IDLE state to await movement requests
 			current_move_state = MoveState.IDLE
 			#update the total move value 
@@ -190,7 +201,7 @@ func _process(delta: float) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			print("Done Wheeling Right.")
 			# Reenable the button, so we can click it again later
-			$WheelRightButton.disabled = false
+			$MoveUI/WheelRightButton.disabled = false
 			# go back to the IDLE state to await movement requests
 			current_move_state = MoveState.IDLE
 			#update the total move value 
@@ -222,7 +233,7 @@ func wheel(starting_transform: Transform2D, amount:float, direction:int) -> Tran
 
 func _on_move_forward_button_pressed() -> void:
 	if current_move_state == MoveState.IDLE:
-		$MoveForwardButton.disabled = true
+		$MoveUI/MoveForwardButton.disabled = true
 		print("Moving")
 		current_move_state = MoveState.FORWARD
 		start_transform = transform
@@ -231,7 +242,7 @@ func _on_move_forward_button_pressed() -> void:
 
 func _on_wheel_left_button_pressed() -> void:
 	if current_move_state == MoveState.IDLE:
-		$WheelLeftButton.disabled = true
+		$MoveUI/WheelLeftButton.disabled = true
 		print("Wheeling Left")
 		current_move_state = MoveState.WHEEL_LEFT
 		start_transform = transform
@@ -247,7 +258,8 @@ func _on_wheel_left_button_pressed() -> void:
 
 func _on_wheel_right_button_pressed() -> void:
 	if current_move_state == MoveState.IDLE:
-		$WheelRightButton.disabled = true
+		hovered = true
+		$MoveUI/WheelRightButton.disabled = true
 		print("Wheeling Right")
 		current_move_state = MoveState.WHEEL_RIGHT
 		start_transform = transform
@@ -264,6 +276,9 @@ func _on_wheel_right_button_pressed() -> void:
 
 func _on_mouse_entered() -> void:
 	$SelectionRect.visible=true
+	hovered = true
 
 func _on_mouse_exited() -> void:
-	$SelectionRect.visible=false
+	if not selected:
+		$SelectionRect.visible=false
+	hovered = false

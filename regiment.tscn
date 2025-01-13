@@ -20,33 +20,6 @@ shape = SubResource("RectangleShape2D_pqu2b")
 [node name="Unit" parent="." instance=ExtResource("2_krtoi")]
 visible = false
 
-[node name="WheelLeftButton" type="Button" parent="."]
-offset_left = 100.0
-offset_right = 128.0
-offset_bottom = 31.0
-icon = SubResource("PlaceholderTexture2D_6ujr4")
-icon_alignment = 1
-expand_icon = true
-script = ExtResource("5_knjt4")
-
-[node name="MoveForwardButton" type="Button" parent="."]
-offset_left = 50.0
-offset_right = 78.0
-offset_bottom = 31.0
-icon = SubResource("PlaceholderTexture2D_6ujr4")
-icon_alignment = 1
-expand_icon = true
-script = ExtResource("5_knjt4")
-
-[node name="WheelRightButton" type="Button" parent="."]
-offset_left = 200.0
-offset_right = 228.0
-offset_bottom = 31.0
-icon = SubResource("PlaceholderTexture2D_6ujr4")
-icon_alignment = 1
-expand_icon = true
-script = ExtResource("5_knjt4")
-
 [node name="LineOfSightLabels" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
@@ -117,8 +90,44 @@ border_color = Color(0, 0.546802, 0.931379, 1)
 border_width = 3.0
 editor_only = false
 
+[node name="MoveUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="WheelLeftButton" type="Button" parent="MoveUI"]
+layout_mode = 0
+offset_left = 100.0
+offset_right = 128.0
+offset_bottom = 31.0
+icon = SubResource("PlaceholderTexture2D_6ujr4")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("5_knjt4")
+
+[node name="MoveForwardButton" type="Button" parent="MoveUI"]
+layout_mode = 0
+offset_left = 50.0
+offset_right = 78.0
+offset_bottom = 31.0
+icon = SubResource("PlaceholderTexture2D_6ujr4")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("5_knjt4")
+
+[node name="WheelRightButton" type="Button" parent="MoveUI"]
+layout_mode = 0
+offset_left = 200.0
+offset_right = 228.0
+offset_bottom = 31.0
+icon = SubResource("PlaceholderTexture2D_6ujr4")
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("5_knjt4")
+
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
-[connection signal="pressed" from="WheelLeftButton" to="." method="_on_wheel_left_button_pressed"]
-[connection signal="pressed" from="MoveForwardButton" to="." method="_on_move_forward_button_pressed"]
-[connection signal="pressed" from="WheelRightButton" to="." method="_on_wheel_right_button_pressed"]
+[connection signal="pressed" from="MoveUI/WheelLeftButton" to="." method="_on_wheel_left_button_pressed"]
+[connection signal="pressed" from="MoveUI/MoveForwardButton" to="." method="_on_move_forward_button_pressed"]
+[connection signal="pressed" from="MoveUI/WheelRightButton" to="." method="_on_wheel_right_button_pressed"]
