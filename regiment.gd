@@ -7,15 +7,19 @@ var total_move = 0
 var pixels_per_inch = 30.
 var stand_size_inches = 2.5
 var stand_size_pixels = stand_size_inches*pixels_per_inch
-var num_stands_wide = 4.
-var num_stands_tall = 3.
+var num_stands_wide = 3.
+var num_stands_tall = 1.
 
 var regiment_size = Vector2(num_stands_wide*stand_size_pixels,num_stands_tall*stand_size_pixels)
 #var stand_scale = stand_size_inches*pixels_per_inch/texture.get_width()
 
-enum MoveState {IDLE, FORWARD, WHEEL_LEFT, WHEEL_RIGHT}
+enum ConstrainedMoveState {IDLE, FORWARD, WHEEL_LEFT, WHEEL_RIGHT}
+enum FreeMoveState {IDLE, MOVING}
+enum RegimentState {IDLE, CONSTRAINED_MOVE, FREE_MOVE}
 
-var current_move_state = MoveState.IDLE
+var constrained_move_state = ConstrainedMoveState.IDLE
+var free_move_state = FreeMoveState.IDLE
+var current_regiment_state = RegimentState.IDLE
 var movelist = []
 var start_position = position
 var start_transform = transform
@@ -27,6 +31,8 @@ var selection_stroke = 3
 
 var selected = false
 var hovered = false
+
+
 
 func _init() -> void:
 	pass#transform = transform.scaled_local(Vector2(stand_scale, stand_scale))
@@ -44,86 +50,34 @@ func _ready() -> void:
 			  , (row-num_stands_tall/2.0+0.5)*stand_size_pixels
 			  )
 			self.add_child(copyunit)
-	$MoveUI.visible = false
+	$ConstrainedMoveUI.visible = false
 	# Position the wheel left button
-	$MoveUI/WheelLeftButton.position = Vector2(
+	$ConstrainedMoveUI/WheelLeftButton.position = Vector2(
 		(num_stands_wide/2.0)*stand_size_pixels#+wheel_left_button.get_rect().size.x/2
 	 , -(num_stands_tall/2.0)*stand_size_pixels
 	 )
-	$MoveUI/WheelRightButton.position = Vector2(
-	   -(num_stands_wide/2.0)*stand_size_pixels-$MoveUI/WheelRightButton.get_rect().size.x
+	$ConstrainedMoveUI/WheelRightButton.position = Vector2(
+	   -(num_stands_wide/2.0)*stand_size_pixels-$ConstrainedMoveUI/WheelRightButton.get_rect().size.x
 	 , -(num_stands_tall/2.0)*stand_size_pixels
 	 )
 	
-	$MoveUI/MoveForwardButton.position = Vector2(
-	  -$MoveUI/MoveForwardButton.get_rect().size.x/2
-	, -(num_stands_tall/2.0)*stand_size_pixels-$MoveUI/MoveForwardButton.get_rect().size.y
+	$ConstrainedMoveUI/MoveForwardButton.position = Vector2(
+	  -$ConstrainedMoveUI/MoveForwardButton.get_rect().size.x/2
+	, -(num_stands_tall/2.0)*stand_size_pixels-$ConstrainedMoveUI/MoveForwardButton.get_rect().size.y
 	)
 	
 	#$DebugStartAngleLine.visible = false
 	#$DebugStartAngleLine.scale=Vector2(num_stands_wide*stand_size_pixels/20, 0.1)
+	$LineOfSightLabels.configure_line_of_sight_labels(
+		num_stands_wide
+	  , num_stands_tall
+	  , stand_size_pixels
+	  , $ConstrainedMoveUI/MoveForwardButton.get_rect()
+	  , $ConstrainedMoveUI/WheelLeftButton.get_rect()
+	  , $ConstrainedMoveUI/WheelRightButton.get_rect()
+	)
 	
-	var label_rect = $LineOfSightLabels/FrontLabel.get_rect()
-	$LineOfSightLabels/FrontLabel.position=Vector2(
-		-label_rect.size.x/2.0
-	  , -(num_stands_tall/2.0)*stand_size_pixels-label_rect.size.y-$MoveUI/MoveForwardButton.get_rect().size.y
-	  )
-	label_rect = $LineOfSightLabels/RearLabel.get_rect()
-	$LineOfSightLabels/RearLabel.position=Vector2(
-		-label_rect.size.x/2.0
-	  , (num_stands_tall/2.0)*stand_size_pixels+$MoveUI/MoveForwardButton.get_rect().size.y
-	  )
-	
-	label_rect = $LineOfSightLabels/SideLabel.get_rect()
-	$LineOfSightLabels/SideLabel.position=Vector2(
-		-(num_stands_wide/2.0)*stand_size_pixels-label_rect.size.y-$MoveUI/WheelRightButton.get_rect().size.x
-	  , label_rect.size.x/2
-	  )
-	
-	label_rect = $LineOfSightLabels/SideLabel2.get_rect()
-	$LineOfSightLabels/SideLabel2.position=Vector2(
-		(num_stands_wide/2.0)*stand_size_pixels+label_rect.size.y+$MoveUI/WheelLeftButton.get_rect().size.x
-	  , -label_rect.size.x/2
-	  )
-	$LineOfSightLabels/LOSLine1.rotation=-3.0*PI/4.0
-	$LineOfSightLabels/LOSLine1.position=Vector2(
-		-(num_stands_wide/2.0)*stand_size_pixels
-	  , -(num_stands_tall/2.0)*stand_size_pixels
-	  )
-	$LineOfSightLabels/LOSLine1.scale=Vector2(
-		50
-	  , 0.5
-	  )
-	
-	$LineOfSightLabels/LOSLine2.rotation=-PI/4.0
-	$LineOfSightLabels/LOSLine2.position=Vector2(
-		 (num_stands_wide/2.0)*stand_size_pixels
-	  , -(num_stands_tall/2.0)*stand_size_pixels
-	  )
-	$LineOfSightLabels/LOSLine2.scale=Vector2(
-		50
-	  , 0.5
-	  )
-	
-	$LineOfSightLabels/LOSLine3.rotation=PI/4.0
-	$LineOfSightLabels/LOSLine3.position=Vector2(
-		 (num_stands_wide/2.0)*stand_size_pixels
-	  ,  (num_stands_tall/2.0)*stand_size_pixels
-	  )
-	$LineOfSightLabels/LOSLine3.scale=Vector2(
-		50
-	  , 0.5
-	  )
-	
-	$LineOfSightLabels/LOSLine4.rotation=3.0*PI/4.0
-	$LineOfSightLabels/LOSLine4.position=Vector2(
-		-(num_stands_wide/2.0)*stand_size_pixels
-	  ,  (num_stands_tall/2.0)*stand_size_pixels
-	  )
-	$LineOfSightLabels/LOSLine4.scale=Vector2(
-		50
-	  , 0.5
-	  )
+	$LineOfSightLabels.visible = false
 	
 	$SelectionRect.size = Vector2(
 		num_stands_wide*stand_size_pixels+selection_stroke
@@ -137,21 +91,39 @@ func _ready() -> void:
 	
 func _process(delta: float) -> void:
 	var direction = 0
-	$MoveUI.visible = selected
-	if current_move_state == MoveState.IDLE:
-		if Input.is_action_just_pressed('Select'):
+	$ConstrainedMoveUI.visible = current_regiment_state == RegimentState.CONSTRAINED_MOVE
+	if current_regiment_state == RegimentState.IDLE:
+		if Input.is_action_pressed('Select'):
 			selected = hovered
 			$SelectionRect.visible=hovered
 			if hovered:
 				$SelectionRect.border_color = Color(1.0,0.0,0.0)
 			else:
 				$SelectionRect.border_color = Color(0.0,0.547,0.931)
+		if Input.is_action_pressed('PerformConstrainedMove') && selected:
+			current_regiment_state = RegimentState.CONSTRAINED_MOVE
+	if current_regiment_state == RegimentState.CONSTRAINED_MOVE:
+		handle_constrained_move()
+	if current_regiment_state == RegimentState.FREE_MOVE:
+		handle_free_move()
+	
+# We want a keypress to take us into a mode, where we can then increase/decrease the value
+# we then confirm, goes back to an IDLE where we then can choose a new mode
+# label that shows total distance travelled
+# also a set of vectors illustrating the movement??	
 
-	if current_move_state == MoveState.FORWARD:
+func handle_constrained_move():
+	if constrained_move_state == ConstrainedMoveState.IDLE:
+		if Input.is_action_pressed('ConfirmMovement'):
+			current_regiment_state = RegimentState.IDLE
+		if Input.is_action_pressed('ChangeMovementMode'):
+			current_regiment_state = RegimentState.FREE_MOVE
+			
+	if constrained_move_state == ConstrainedMoveState.FORWARD:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			print("Done Moving.")
-			current_move_state = MoveState.IDLE
-			$MoveUI/MoveForwardButton.disabled = false
+			constrained_move_state = ConstrainedMoveState.IDLE
+			$ConstrainedMoveUI/MoveForwardButton.disabled = false
 		var mouse_vec = start_transform.basis_xform_inv(get_global_mouse_position())
 		#print(mouse_vec, get_local_mouse_position(), move_start_position)
 		var disp_vec = Vector2(0, mouse_vec.y - move_start_position.y)
@@ -161,7 +133,7 @@ func _process(delta: float) -> void:
 		transform = start_transform.translated_local(disp_vec)
 		update_total_move.emit((total_move-disp_vec.y)/pixels_per_inch)
 	
-	if current_move_state == MoveState.WHEEL_LEFT:
+	if constrained_move_state == ConstrainedMoveState.WHEEL_LEFT:
 		var mouse_vec= get_global_mouse_position()
 		#The delta factor in a wheel is the angle difference between the start vector
 		#and the current mouse position vector, relative to the pivot point (front corner)
@@ -179,13 +151,13 @@ func _process(delta: float) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			print("Done Wheeling Left.")
 			# Reenable the button, so we can click it again later
-			$MoveUI/WheelLeftButton.disabled = false
+			$ConstrainedMoveUI/WheelLeftButton.disabled = false
 			# go back to the IDLE state to await movement requests
-			current_move_state = MoveState.IDLE
+			constrained_move_state = ConstrainedMoveState.IDLE
 			#update the total move value 
 			total_move += abs(delta_factor)*num_stands_wide*stand_size_inches*pixels_per_inch
 	
-	if current_move_state == MoveState.WHEEL_RIGHT:
+	if constrained_move_state == ConstrainedMoveState.WHEEL_RIGHT:
 		var mouse_vec= get_global_mouse_position()#start_transform.basis_xform_inv(get_global_mouse_position())
 		delta_factor = (move_start_position-pivot_location).angle_to(mouse_vec-pivot_location)
 		#We can also snap to the nearest value
@@ -201,16 +173,19 @@ func _process(delta: float) -> void:
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			print("Done Wheeling Right.")
 			# Reenable the button, so we can click it again later
-			$MoveUI/WheelRightButton.disabled = false
+			$ConstrainedMoveUI/WheelRightButton.disabled = false
 			# go back to the IDLE state to await movement requests
-			current_move_state = MoveState.IDLE
+			constrained_move_state = ConstrainedMoveState.IDLE
 			#update the total move value 
 			total_move += abs(delta_factor)*num_stands_wide*stand_size_inches*pixels_per_inch
 	
-# We want a keypress to take us into a mode, where we can then increase/decrease the value
-# we then confirm, goes back to an IDLE where we then can choose a new mode
-# label that shows total distance travelled
-# also a set of vectors illustrating the movement??	
+
+func handle_free_move():
+	if constrained_move_state == ConstrainedMoveState.IDLE:
+		if Input.is_action_pressed('ConfirmMovement'):
+			current_regiment_state = RegimentState.IDLE
+		if Input.is_action_pressed('ChangeMovementMode'):
+			current_regiment_state = RegimentState.FREE_MOVE
 
 func round_delta_factor_to_nearest_increment(delta_factor: float, increment:float):
 	var fractional_value = delta_factor/increment
@@ -232,19 +207,19 @@ func wheel(starting_transform: Transform2D, amount:float, direction:int) -> Tran
 
 
 func _on_move_forward_button_pressed() -> void:
-	if current_move_state == MoveState.IDLE:
-		$MoveUI/MoveForwardButton.disabled = true
+	if constrained_move_state == ConstrainedMoveState.IDLE:
+		$ConstrainedMoveUI/MoveForwardButton.disabled = true
 		print("Moving")
-		current_move_state = MoveState.FORWARD
+		constrained_move_state = ConstrainedMoveState.FORWARD
 		start_transform = transform
 		move_start_position = start_transform.basis_xform_inv(get_global_mouse_position())
 
 
 func _on_wheel_left_button_pressed() -> void:
-	if current_move_state == MoveState.IDLE:
-		$MoveUI/WheelLeftButton.disabled = true
+	if constrained_move_state == ConstrainedMoveState.IDLE:
+		$ConstrainedMoveUI/WheelLeftButton.disabled = true
 		print("Wheeling Left")
-		current_move_state = MoveState.WHEEL_LEFT
+		constrained_move_state = ConstrainedMoveState.WHEEL_LEFT
 		start_transform = transform
 		move_start_position = get_global_mouse_position()#get_local_mouse_position()#start_transform.basis_xform_inv(get_global_mouse_position())
 		var reg_width = stand_size_inches*num_stands_wide*pixels_per_inch
@@ -257,11 +232,10 @@ func _on_wheel_left_button_pressed() -> void:
 
 
 func _on_wheel_right_button_pressed() -> void:
-	if current_move_state == MoveState.IDLE:
-		hovered = true
-		$MoveUI/WheelRightButton.disabled = true
+	if constrained_move_state == ConstrainedMoveState.IDLE:
+		$ConstrainedMoveUI/WheelRightButton.disabled = true
 		print("Wheeling Right")
-		current_move_state = MoveState.WHEEL_RIGHT
+		constrained_move_state = ConstrainedMoveState.WHEEL_RIGHT
 		start_transform = transform
 		move_start_position = get_global_mouse_position()#get_local_mouse_position()#start_transform.basis_xform_inv(get_global_mouse_position())
 		var reg_width = stand_size_inches*num_stands_wide*pixels_per_inch
@@ -271,7 +245,6 @@ func _on_wheel_right_button_pressed() -> void:
 			 , -reg_height/2
 			 )
 		pivot_location = to_global(pivot_location) # Replace with function body.
-
 
 
 func _on_mouse_entered() -> void:
