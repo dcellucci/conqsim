@@ -1,8 +1,7 @@
 extends Area2D
 signal update_total_move(new_total_move)
+signal update_hovered()
 
-var speed = 400
-var angular_speed = PI
 var total_move = 0
 var pixels_per_inch = 30.
 var stand_size_inches = 2.5
@@ -249,6 +248,9 @@ func _on_wheel_right_button_pressed() -> void:
 
 func _on_mouse_entered() -> void:
 	$SelectionRect.visible=true
+	if not selected:
+		update_hovered.emit()
+		
 	hovered = true
 
 func _on_mouse_exited() -> void:
