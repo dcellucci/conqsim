@@ -13,4 +13,4 @@ func _process(delta: float) -> void:
 
 
 func _on_update_total_move(new_total_move):
-	$HUD.update_total_move(new_total_move)
+	$HUDViewport/HUD.update_total_move(new_total_move)

@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3 uid="uid://c5cii5i2h68xo"]
+
+[ext_resource type="Script" path="res://regiment.gd" id="1_sqsrb"]
+[ext_resource type="PackedScene" uid="uid://cdwy8aj77yu32" path="res://unit.tscn" id="2_krtoi"]
+[ext_resource type="Script" path="res://wheel_button.gd" id="3_w0knh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pqu2b"]
+size = Vector2(100, 200)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_des6n"]
+size = Vector2(40, 40)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_0jtwv"]
+
+[node name="Regiment" type="Area2D"]
+script = ExtResource("1_sqsrb")
+
+[node name="BoundingBox" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_pqu2b")
+
+[node name="Unit" parent="." instance=ExtResource("2_krtoi")]
+visible = false
+
+[node name="WheelLeftButton" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_des6n")
+script = ExtResource("3_w0knh")
+
+[node name="pivot_point" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-55, -24)
+scale = Vector2(4.777, 5)
+texture = SubResource("PlaceholderTexture2D_0jtwv")
+
+[connection signal="set_wheeling" from="WheelLeftButton" to="." method="_receive_set_wheeling"]
