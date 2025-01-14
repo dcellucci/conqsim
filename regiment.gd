@@ -14,7 +14,7 @@ var regiment_size = Vector2(num_stands_wide*stand_size_pixels,num_stands_tall*st
 
 enum ConstrainedMoveState {IDLE, FORWARD, WHEEL_LEFT, WHEEL_RIGHT}
 enum FreeMoveState {IDLE, MOVING}
-enum RegimentState {IDLE, CONSTRAINED_MOVE, FREE_MOVE}
+enum RegimentState {IDLE, CONSTRAINED_MOVE, FREE_MOVE, DEPLOY}
 
 var constrained_move_state = ConstrainedMoveState.IDLE
 var free_move_state = FreeMoveState.IDLE
@@ -101,10 +101,14 @@ func _process(delta: float) -> void:
 				$SelectionRect.border_color = Color(0.0,0.547,0.931)
 		if Input.is_action_pressed('PerformConstrainedMove') && selected:
 			current_regiment_state = RegimentState.CONSTRAINED_MOVE
+		if Input.is_action_pressed('PerformDeployment') && selected:
+			current_regiment_state = RegimentState.DEPLOY
 	if current_regiment_state == RegimentState.CONSTRAINED_MOVE:
 		handle_constrained_move()
 	if current_regiment_state == RegimentState.FREE_MOVE:
 		handle_free_move()
+	if current_regiment_state == RegimentState.DEPLOY:
+		handle_deploy()
 	
 # We want a keypress to take us into a mode, where we can then increase/decrease the value
 # we then confirm, goes back to an IDLE where we then can choose a new mode
@@ -178,13 +182,28 @@ func handle_constrained_move():
 			#update the total move value 
 			total_move += abs(delta_factor)*num_stands_wide*stand_size_inches*pixels_per_inch
 	
-
+func handle_deploy():
+	var board = $/root/GameInfo.game_board
+	var pointlist = board.get_polygon()
+	var min_dist = 1e6
+	var closest_point
+	for i in range(len(pointlist)):
+		var point1 = board.global_transform.basis_xform(pointlist[i])
+		var point2 = board.global_transform.basis_xform(pointlist[(i+1)%(len(pointlist))])
+		var mouse_loc = get_global_mouse_position()
+		var point3 = Geometry2D.get_closest_point_to_segment(mouse_loc, point1, point2)
+		if mouse_loc.distance_to(point3)	 < min_dist:
+			min_dist = mouse_loc.distance_to(point3)	
+			closest_point = point3
+	position = closest_point
+			
+	
 func handle_free_move():
 	if constrained_move_state == ConstrainedMoveState.IDLE:
 		if Input.is_action_pressed('ConfirmMovement'):
 			current_regiment_state = RegimentState.IDLE
 		if Input.is_action_pressed('ChangeMovementMode'):
-			current_regiment_state = RegimentState.FREE_MOVE
+			current_regiment_state = RegimentState.CONSTRAINED_MOVE
 
 func round_delta_factor_to_nearest_increment(delta_factor: float, increment:float):
 	var fractional_value = delta_factor/increment
