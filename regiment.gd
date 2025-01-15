@@ -102,6 +102,7 @@ func _process(delta: float) -> void:
 		if Input.is_action_pressed('PerformConstrainedMove') && selected:
 			current_regiment_state = RegimentState.CONSTRAINED_MOVE
 		if Input.is_action_pressed('PerformDeployment') && selected:
+			start_transform = transform
 			current_regiment_state = RegimentState.DEPLOY
 	if current_regiment_state == RegimentState.CONSTRAINED_MOVE:
 		handle_constrained_move()
@@ -185,17 +186,25 @@ func handle_constrained_move():
 func handle_deploy():
 	var board = $/root/GameInfo.game_board
 	var pointlist = board.get_polygon()
-	var min_dist = 1e6
+	var min_dist = $"/root/GameInfo".snap_distance
 	var closest_point
+	var normal
+	var mouse_loc = get_global_mouse_position()
+	transform = start_transform
 	for i in range(len(pointlist)):
 		var point1 = board.global_transform.basis_xform(pointlist[i])
 		var point2 = board.global_transform.basis_xform(pointlist[(i+1)%(len(pointlist))])
-		var mouse_loc = get_global_mouse_position()
 		var point3 = Geometry2D.get_closest_point_to_segment(mouse_loc, point1, point2)
 		if mouse_loc.distance_to(point3)	 < min_dist:
 			min_dist = mouse_loc.distance_to(point3)	
 			closest_point = point3
-	position = closest_point
+			normal = (point1-point2).rotated(PI/2)
+	if closest_point:
+		var regiment_forward = Vector2(0,1).rotated(start_transform.get_rotation())
+		position = closest_point
+		transform = transform.rotated_local(
+			regiment_forward.angle_to(normal)
+		  ).translated_local(Vector2(0, num_stands_tall/2.0*stand_size_pixels))
 			
 	
 func handle_free_move():

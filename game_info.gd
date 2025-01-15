@@ -2,6 +2,7 @@ extends Node
 
 var pixels_per_inch = 30.
 var game_board
+var snap_distance = 100.
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
