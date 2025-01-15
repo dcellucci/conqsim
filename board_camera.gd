@@ -18,6 +18,10 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventPanGesture:		
 		set_zoom_level(zoom_level + sign(event.delta.y)*zoom_factor)
+	if event.is_action("ZoomIn"):
+		set_zoom_level(zoom_level + zoom_factor)
+	if event.is_action("ZoomOut"):
+		set_zoom_level(zoom_level - zoom_factor)
 	if event.is_action_pressed("DragCamera"):
 		dragging = true
 		drag_start_location = event.global_position
