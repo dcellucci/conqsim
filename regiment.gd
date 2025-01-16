@@ -6,8 +6,8 @@ var total_move = 0
 var pixels_per_inch = 30.
 var stand_size_inches = 2.5
 var stand_size_pixels = stand_size_inches*pixels_per_inch
-var num_stands_wide = 3.
-var num_stands_tall = 1.
+var num_stands_wide = 1.
+var num_stands_tall = 2.
 
 var regiment_size = Vector2(num_stands_wide*stand_size_pixels,num_stands_tall*stand_size_pixels)
 #var stand_scale = stand_size_inches*pixels_per_inch/texture.get_width()
@@ -39,16 +39,16 @@ func _init() -> void:
 func _ready() -> void:
 	$BoundingBox.shape.set_size(regiment_size)
 	# Add the unit sprites
-	var unit = $Unit
+	var stand = $Stand
 	for row in range(num_stands_tall):
 		for col in range(num_stands_wide):
-			var copyunit = unit.duplicate()
+			var copyunit = stand.duplicate()
 			copyunit.visible = true
+			self.add_child(copyunit)
 			copyunit.position = Vector2(
 				(col-num_stands_wide/2.0+0.5)*stand_size_pixels
 			  , (row-num_stands_tall/2.0+0.5)*stand_size_pixels
 			  )
-			self.add_child(copyunit)
 	$ConstrainedMoveUI.visible = false
 	# Position the wheel left button
 	$ConstrainedMoveUI/WheelLeftButton.position = Vector2(
@@ -133,7 +133,6 @@ func handle_constrained_move():
 		var disp_vec = Vector2(0, mouse_vec.y - move_start_position.y)
 		if Input.is_action_pressed("SnapMovement"):
 			disp_vec = Vector2(0,  round_delta_factor_to_nearest_increment(disp_vec.y, 1.*pixels_per_inch))
-			print(disp_vec)
 		transform = start_transform.translated_local(disp_vec)
 		update_total_move.emit((total_move-disp_vec.y)/pixels_per_inch)
 	

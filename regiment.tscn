@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://c5cii5i2h68xo"]
 
 [ext_resource type="Script" path="res://regiment.gd" id="1_sqsrb"]
-[ext_resource type="PackedScene" uid="uid://cdwy8aj77yu32" path="res://unit.tscn" id="2_krtoi"]
+[ext_resource type="PackedScene" uid="uid://cdwy8aj77yu32" path="res://stand.tscn" id="2_krtoi"]
 [ext_resource type="Script" path="res://line_of_sight_labels.gd" id="3_tamgp"]
 [ext_resource type="Script" path="res://move_forward_button.gd" id="5_knjt4"]
 
@@ -18,7 +18,7 @@ top_level = true
 position = Vector2(8, -1)
 shape = SubResource("RectangleShape2D_pqu2b")
 
-[node name="Unit" parent="." instance=ExtResource("2_krtoi")]
+[node name="Stand" parent="." instance=ExtResource("2_krtoi")]
 visible = false
 
 [node name="LineOfSightLabels" type="Control" parent="."]
