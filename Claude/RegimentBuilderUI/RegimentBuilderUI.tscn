@@ -1,0 +1,104 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpbflgx5s8eqw"]
+
+[ext_resource type="Script" uid="uid://xc4ghu7ln1h" path="res://RegimentBuilderUI.gd" id="1_2x8vd"]
+
+[node name="RegimentBuilderUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2x8vd")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Regiment Builder"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="RegimentControls" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="WidthLabel" type="Label" parent="VBoxContainer/RegimentControls"]
+layout_mode = 2
+text = "Width:"
+
+[node name="WidthSpinBox" type="SpinBox" parent="VBoxContainer/RegimentControls"]
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+value = 5.0
+
+[node name="HeightLabel" type="Label" parent="VBoxContainer/RegimentControls"]
+layout_mode = 2
+text = "Height:"
+
+[node name="HeightSpinBox" type="SpinBox" parent="VBoxContainer/RegimentControls"]
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+value = 3.0
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="MainContent" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="VBoxContainer" parent="VBoxContainer/MainContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CharacterLabel" type="Label" parent="VBoxContainer/MainContent/LeftPanel"]
+layout_mode = 2
+text = "Character Stands"
+
+[node name="CharacterTray" type="GridContainer" parent="VBoxContainer/MainContent/LeftPanel" groups=["stand_trays"]]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 6
+
+[node name="TroopLabel" type="Label" parent="VBoxContainer/MainContent/LeftPanel"]
+layout_mode = 2
+text = "Troop Stands"
+
+[node name="TroopTray" type="GridContainer" parent="VBoxContainer/MainContent/LeftPanel" groups=["stand_trays"]]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 6
+
+[node name="RightPanel" type="VBoxContainer" parent="VBoxContainer/MainContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RegimentLabel" type="Label" parent="VBoxContainer/MainContent/RightPanel"]
+layout_mode = 2
+text = "Regiment Formation"
+
+[node name="RegimentTray" type="GridContainer" parent="VBoxContainer/MainContent/RightPanel" groups=["stand_trays"]]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 5
+
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="OutputButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Output Regiment Data"
