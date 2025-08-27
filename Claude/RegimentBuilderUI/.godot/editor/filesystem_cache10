@@ -1,6 +1,6 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1754937525
-RegimentBuilderUI.gd::GDScript/GDScript::47654237257801031::1754937343::0::1::::RegimentBuilderUI<>Control<><>0<>0<><>::
-RegimentBuilderUI.tscn::PackedScene::8214482664159656302::1754937526::0::1::::<><><>0<>0<><>::uid://xc4ghu7ln1h::::res://RegimentBuilderUI.gd
-StandSlot.gd::GDScript/GDScript::4313044020641925455::1754937268::0::1::::StandSlot<>TextureRect<><>0<>0<><>::
-StandSlot.tscn::PackedScene::3884035117099737116::1754937526::0::1::::<><><>0<>0<><>::uid://b2pjg73pwbx2v::::res://StandSlot.gd
+::res://::1755012221
+RegimentBuilderUI.gd::GDScript::47654237257801031::1755012141::0::1::::RegimentBuilderUI<>Control<><>0<>0<><>::
+RegimentBuilderUI.tscn::PackedScene::8214482664159656302::1755012141::0::1::::<><><>0<>0<><>::uid://xc4ghu7ln1h::::res://RegimentBuilderUI.gd
+StandSlot.gd::GDScript::4313044020641925455::1755012141::0::1::::StandSlot<>TextureRect<><>0<>0<><>::
+StandSlot.tscn::PackedScene::3884035117099737116::1755012141::0::1::::<><><>0<>0<><>::uid://b2pjg73pwbx2v::::res://StandSlot.gd
