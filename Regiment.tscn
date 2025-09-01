@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3 uid="uid://cxuh0rxhgvalv"]
+
+[ext_resource type="Script" uid="uid://bs3ey42inx1e1" path="res://regiment.gd" id="1_kun14"]
+[ext_resource type="Script" uid="uid://bewdi31vnegbk" path="res://move_regiment_ui.gd" id="2_2a25j"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kun14"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_kun14"]
+size = Vector2(10, 10)
+
+[node name="Regiment" type="Node2D"]
+z_index = 1
+script = ExtResource("1_kun14")
+
+[node name="MouseHoverArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MouseHoverArea"]
+shape = SubResource("RectangleShape2D_kun14")
+
+[node name="StandTray" type="Polygon2D" parent="."]
+color = Color(0.246, 0, 0.82, 1)
+
+[node name="StandHoveredBorder" type="Line2D" parent="StandTray"]
+closed = true
+width = 6.0
+
+[node name="StandSelectedBorder" type="Line2D" parent="StandTray"]
+closed = true
+width = 3.0
+default_color = Color(1, 0, 0, 1)
+
+[node name="MoveRegimentUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_2a25j")
+
+[node name="MarchButton" type="TextureButton" parent="MoveRegimentUI"]
+layout_mode = 0
+offset_right = 10.0
+offset_bottom = 10.0
+texture_normal = SubResource("PlaceholderTexture2D_kun14")

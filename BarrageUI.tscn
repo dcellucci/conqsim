@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://e5yqvckp6o0t"]
+
+[ext_resource type="Script" uid="uid://bamsqos0o5og6" path="res://barrage_ui.gd" id="1_42kjc"]
+
+[node name="BarrageMenu" type="VBoxContainer"]
+offset_right = 110.0
+offset_bottom = 23.0
+script = ExtResource("1_42kjc")
+
+[node name="MenuTitle" type="Label" parent="."]
+layout_mode = 2
+text = "Barrage Menu"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="RangeSpinRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="RangeSpinLabel" type="Label" parent="RangeSpinRow"]
+layout_mode = 2
+text = "Range"
+
+[node name="RangeSpinBox" type="SpinBox" parent="RangeSpinRow"]
+layout_mode = 2
+rounded = true
+
+[node name="FluidFormationCheckButton" type="CheckButton" parent="."]
+layout_mode = 2
+text = "Fluid Formation"
+
+[node name="BarrageModeToggleButton" type="Button" parent="."]
+layout_mode = 2
+text = "Switch to LOS Mode (Tab)"
+
+[node name="CancelButton" type="Button" parent="."]
+layout_mode = 2
+text = "Cancel"

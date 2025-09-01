@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdyx18rcm2m2a"]
+
+[ext_resource type="Script" uid="uid://cbsclf00334ov" path="res://select_regiment_ui.gd" id="1_rkvbp"]
+
+[node name="SelectRegimentUI" type="VBoxContainer"]
+offset_right = 408.0
+offset_bottom = 101.0
+script = ExtResource("1_rkvbp")
+
+[node name="MenuTitle" type="Label" parent="."]
+layout_mode = 2
+text = "Selected Regiment"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MoveRegimentButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Move"
+
+[node name="ChargeRegimentButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Charge"
+
+[node name="ReformRegimentButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Reform"
+
+[node name="DeployRegimentButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Deploy"
+
+[node name="BarrageButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Barrage"
+
+[node name="MeasureButton" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Measure"
+
+[node name="CancelButton" type="Button" parent="."]
+layout_mode = 2
+text = "Cancel
+"

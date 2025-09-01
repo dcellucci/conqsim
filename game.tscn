@@ -1,0 +1,74 @@
+[gd_scene load_steps=9 format=3 uid="uid://d1norbt06jlf4"]
+
+[ext_resource type="Script" uid="uid://boiscwvyx6e82" path="res://game.gd" id="1_80nbo"]
+[ext_resource type="Script" uid="uid://b8kykhuqrmndv" path="res://board.gd" id="2_e2o6t"]
+[ext_resource type="Script" uid="uid://cvmmbswbmcjx2" path="res://board_camera.gd" id="3_feb5d"]
+[ext_resource type="Script" uid="uid://csodsp0laqu1l" path="res://hud_canvas_layer.gd" id="4_fc0e3"]
+[ext_resource type="PackedScene" uid="uid://e5yqvckp6o0t" path="res://BarrageUI.tscn" id="5_7jktm"]
+[ext_resource type="PackedScene" uid="uid://bdyx18rcm2m2a" path="res://SelectRegimentUI.tscn" id="5_ryrav"]
+[ext_resource type="Script" uid="uid://vrxunbpmjjqf" path="res://barrage_hud.gd" id="7_eow3j"]
+
+[sub_resource type="Theme" id="Theme_feb5d"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_80nbo")
+
+[node name="Board" type="Polygon2D" parent="."]
+color = Color(0.368627, 0.309804, 0.254902, 1)
+polygon = PackedVector2Array(-15, -15, 15, -15, 15, 15, -15, 15)
+script = ExtResource("2_e2o6t")
+
+[node name="BoardCamera" type="Camera2D" parent="."]
+script = ExtResource("3_feb5d")
+
+[node name="HUDCanvasLayer" type="CanvasLayer" parent="."]
+script = ExtResource("4_fc0e3")
+
+[node name="LeftSidebarPanel" type="Panel" parent="HUDCanvasLayer"]
+custom_minimum_size = Vector2(300, 200)
+offset_right = 200.0
+
+[node name="LeftSidebarVBoxContainer" type="VBoxContainer" parent="HUDCanvasLayer/LeftSidebarPanel"]
+layout_mode = 0
+offset_left = 10.0
+offset_right = 418.0
+offset_bottom = 300.0
+theme = SubResource("Theme_feb5d")
+
+[node name="SelectRegimentUI" parent="HUDCanvasLayer/LeftSidebarPanel/LeftSidebarVBoxContainer" instance=ExtResource("5_ryrav")]
+layout_mode = 2
+
+[node name="BarrageMenu" parent="HUDCanvasLayer/LeftSidebarPanel/LeftSidebarVBoxContainer" instance=ExtResource("5_7jktm")]
+layout_mode = 2
+
+[node name="RightSidebarPanel" type="Panel" parent="HUDCanvasLayer"]
+custom_minimum_size = Vector2(200, 200)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_bottom = 200.0
+grow_horizontal = 0
+
+[node name="RightSidebarVBoxContainer" type="VBoxContainer" parent="HUDCanvasLayer/RightSidebarPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BoardHUDManager" type="Node2D" parent="."]
+
+[node name="BarrageHUD" type="Node2D" parent="BoardHUDManager"]
+z_index = 10
+script = ExtResource("7_eow3j")
+
+[node name="BarrageLines" type="Node2D" parent="BoardHUDManager/BarrageHUD"]
+
+[node name="FullExtentLines" type="Node2D" parent="BoardHUDManager/BarrageHUD/BarrageLines"]
+
+[node name="RangeLines" type="Node2D" parent="BoardHUDManager/BarrageHUD/BarrageLines"]
+z_index = 1
+
+[node name="EffectiveRangeLines" type="Node2D" parent="BoardHUDManager/BarrageHUD/BarrageLines"]
+z_index = 2
+
+[node name="LosLines" type="Node2D" parent="BoardHUDManager/BarrageHUD"]
