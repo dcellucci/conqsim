@@ -49,11 +49,13 @@ func update_display():
 		$LosLines.add_child(los_line)
 	
 func _process(delta: float) -> void:
-	# Only process when in barrage UI mode
-	if GameState.selected_regiment_state != GameState.Regiment.UIState.BARRAGE:
-		return
 	# Need a selected regiment to work with
 	if GameState.selected_regiment == null: 
+		visible = false
+		return
+	# Only process when in barrage UI mode
+	if GameState.selected_regiment_state != GameState.Regiment.UIState.BARRAGE:
+		visible = false
 		return
 	# Get the regiment's transform (position and rotation in global space)
 	var regiment_transform = GameState.selected_regiment.get_transform()
@@ -83,24 +85,19 @@ func update_los_lines(local_mouse_position: Vector2):
 		child.points[1] = local_mouse_position
 
 func update_barrage_lines(local_mouse_position: Vector2):
-	for child_index:int in range($BarrageLines/FullExtentLines.get_children().size()):
-		var stand_start_point = Vector2(
-			(-(GameState.selected_regiment.width*0.5)+(child_index+1))*GameSettings.STAND_DIM_PX
-		  , -0.5*GameState.selected_regiment.height*GameSettings.STAND_DIM_PX
-		  )
-		var stand_end_point = Vector2(
-			(-(GameState.selected_regiment.width*0.5)+(child_index))*GameSettings.STAND_DIM_PX
-		  , -0.5*GameState.selected_regiment.height*GameSettings.STAND_DIM_PX
-		  )
+	var stand_arc = GameState.selected_regiment.determine_which_arc(local_mouse_position)
+	var stand_segments = GameState.selected_regiment.stand_segments(stand_arc)
+	for stand_index:int in range(stand_segments.size(),2):
 		var closest_point_on_stand = Geometry2D.get_closest_point_to_segment(
 			  local_mouse_position
-			, stand_start_point
-			, stand_end_point
+			, stand_segments[stand_index]
+			, stand_segments[stand_index]
 			)
 		var delta_vector = local_mouse_position - closest_point_on_stand
 		var range_scale_factor = float(GameState.selected_regiment.barrage_range)*GameSettings.PIXELS_PER_INCH/delta_vector.length()
 		var effective_range_scale_factor = min(1.0,0.5*range_scale_factor)
 		range_scale_factor = min(1.0, range_scale_factor)
+		var child_index = floor(stand_index / 2)
 		$BarrageLines/FullExtentLines.get_children()[child_index].points[1] = local_mouse_position
 		$BarrageLines/FullExtentLines.get_children()[child_index].points[0] = closest_point_on_stand
 		
