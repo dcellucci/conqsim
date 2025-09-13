@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://d1norbt06jlf4"]
+[gd_scene load_steps=11 format=3 uid="uid://d1norbt06jlf4"]
 
 [ext_resource type="Script" uid="uid://boiscwvyx6e82" path="res://game.gd" id="1_80nbo"]
 [ext_resource type="Script" uid="uid://b8kykhuqrmndv" path="res://board.gd" id="2_e2o6t"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://e5yqvckp6o0t" path="res://BarrageUI.tscn" id="5_7jktm"]
 [ext_resource type="PackedScene" uid="uid://bdyx18rcm2m2a" path="res://SelectRegimentUI.tscn" id="5_ryrav"]
 [ext_resource type="Script" uid="uid://vrxunbpmjjqf" path="res://barrage_hud.gd" id="7_eow3j"]
+[ext_resource type="PackedScene" uid="uid://d2mqvbuhdvgpv" path="res://ChargeUI.tscn" id="7_j5wjh"]
+[ext_resource type="Script" uid="uid://dc32r1mc0a20" path="res://charge_hud.gd" id="9_vef74"]
 
 [sub_resource type="Theme" id="Theme_feb5d"]
 
@@ -14,6 +16,7 @@
 script = ExtResource("1_80nbo")
 
 [node name="Board" type="Polygon2D" parent="."]
+z_index = -10
 color = Color(0.368627, 0.309804, 0.254902, 1)
 polygon = PackedVector2Array(-15, -15, 15, -15, 15, 15, -15, 15)
 script = ExtResource("2_e2o6t")
@@ -29,16 +32,20 @@ custom_minimum_size = Vector2(300, 200)
 offset_right = 200.0
 
 [node name="LeftSidebarVBoxContainer" type="VBoxContainer" parent="HUDCanvasLayer/LeftSidebarPanel"]
-layout_mode = 0
-offset_left = 10.0
-offset_right = 418.0
-offset_bottom = 300.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 486.0
+grow_horizontal = 2
 theme = SubResource("Theme_feb5d")
 
 [node name="SelectRegimentUI" parent="HUDCanvasLayer/LeftSidebarPanel/LeftSidebarVBoxContainer" instance=ExtResource("5_ryrav")]
 layout_mode = 2
 
 [node name="BarrageMenu" parent="HUDCanvasLayer/LeftSidebarPanel/LeftSidebarVBoxContainer" instance=ExtResource("5_7jktm")]
+layout_mode = 2
+
+[node name="ChargeMenu" parent="HUDCanvasLayer/LeftSidebarPanel/LeftSidebarVBoxContainer" instance=ExtResource("7_j5wjh")]
 layout_mode = 2
 
 [node name="RightSidebarPanel" type="Panel" parent="HUDCanvasLayer"]
@@ -56,6 +63,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="BoardHUDManager" type="Node2D" parent="."]
+z_index = 2
 
 [node name="BarrageHUD" type="Node2D" parent="BoardHUDManager"]
 z_index = 10
@@ -72,3 +80,13 @@ z_index = 1
 z_index = 2
 
 [node name="LosLines" type="Node2D" parent="BoardHUDManager/BarrageHUD"]
+
+[node name="ChargeHUD" type="Node2D" parent="BoardHUDManager"]
+script = ExtResource("9_vef74")
+
+[node name="GhostRegiment" type="Polygon2D" parent="BoardHUDManager/ChargeHUD"]
+z_index = -3
+polygon = PackedVector2Array(-1, -1, 1, -1, 1, 1, -1, 1)
+
+[node name="Line2D" type="Line2D" parent="BoardHUDManager/ChargeHUD"]
+points = PackedVector2Array(0, 0, 0, 0)

@@ -3,15 +3,18 @@ extends CanvasLayer
 func _ready() -> void:
 	pass
 	
-	
-## TODO: How do we get the UI to "wrap" Hbox entries based on the parent width?
 func _process(delta: float) -> void:
 	$LeftSidebarPanel/LeftSidebarVBoxContainer/BarrageMenu.visible = (
-		GameState.selected_regiment_state == GameState.Regiment.UIState.BARRAGE
+		UiStateMachine.ui_state_machine.is_barrage_state()
 	)
 	
 	$LeftSidebarPanel/LeftSidebarVBoxContainer/SelectRegimentUI.visible = (
-		GameState.selected_regiment_state == GameState.Regiment.UIState.NONE
+		UiStateMachine.ui_state_machine.is_idle() and 
+		GameState.selected_regiment != null
+	)
+	
+	$LeftSidebarPanel/LeftSidebarVBoxContainer/ChargeMenu.visible = (
+		UiStateMachine.ui_state_machine.is_charge_state()
 	)
 
 func update_dims():

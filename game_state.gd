@@ -1,24 +1,34 @@
 extends Node
 
+#enum UIState {MOVE, REFORM, DEPLOY, CHARGE, BARRAGE, MEASURE, NONE}
+#enum IOState {NONE, CHARGE_TARGET, CHARGE_FRONTAGE, REFORM_ROTATE, MOVE_INITIALIZE
+#			 , CHARGE_INITIALIZE }
+
 # The game state is the latest of a set of interim_game_states
 var interim_game_states: Array[InterimGameState]
 # one day we want to show replay, this allows us to do that
 var current_state_location: int
 # we also want to track which regiment is selected 
 var selected_regiment: Regiment
-var selected_regiment_state: Regiment.UIState
+#var ui_state: UIState
+#var io_state: IOState
+#var prev_io_state: IOState
+var regiment_starting_position: Vector2
+var regiment_starting_rotation: float
 # also want to track which regiment is currently hovered (maybe?)
 var hovered_regiment: Regiment
 # one player has supremacy
 var supremacy: Player
 
+
 #We should also track the regiment scenes currently being displayed on the 
 #board
 var displayed_regiments: Array[Node]
 
-# UI mode related to the barrage menu- do we display LOS lines or range 
-# measurements
-var barrage_measure_los_mode: bool = false
+# 
+var charge_selected_arc: Regiment.ARC
+var charge_targeted_regiment: Regiment
+var charge_target_initial_transform:Transform2D
 
 class InterimGameState:
 	# Each interim game state is assigned a modification type purely for the 
@@ -50,9 +60,9 @@ class InterimGameState:
 	# rolled it and what the results were
 	var dice_roll: DiceRoll
 
+
 # Class denoting a game piece
 class Regiment:
-	enum UIState {MOVE, REFORM, DEPLOY, CHARGE, BARRAGE, MEASURE, NONE}
 	enum ARC {FRONT, LEFT, RIGHT, REAR, INSIDE}
 	# Regiments have a name
 	var name: String
@@ -81,6 +91,8 @@ class Regiment:
 	var fluid_formation: bool = false
 	# A regiment can have a barrage range, default is 0
 	var barrage_range: int = 0
+	# A regiment can move a certain number of inches per action
+	var move: int = 0
 	
 	func get_transform() -> Transform2D:
 		return Transform2D(-deg_to_rad(self.rotation), self.position)  
@@ -108,6 +120,12 @@ class Regiment:
 			if point.x > 0:
 				return ARC.RIGHT
 		return ARC.LEFT
+		
+	func get_width_px() -> float:
+		return width*GameSettings.STAND_DIM_PX
+		
+	func get_height_px() -> float:
+		return height*GameSettings.STAND_DIM_PX
 	
 	# Returns a list of points corresponding to the start and end coordinates of a 
 	# regiment's stands in the requested facing. A regiment is composed of a 
@@ -135,7 +153,7 @@ class Regiment:
 				stand_segment_list.append(Vector2(xcoord, ycoord_end))
 		return stand_segment_list
 		
-
+	
 # Regiments are composed of stands
 class Stand:
 	# each stand has a name
@@ -173,3 +191,110 @@ class Player:
 	var name: String
 	# Player is a number, the game is player 0
 	var number: int
+	
+class SnapCursorBundle:
+	var snap_point: Vector2
+	var arc: Regiment.ARC
+	var regiment: Regiment
+
+# Finds the optimal cursor position for barrage targeting by snapping to nearby 
+# regiment edges. This function iterates through all regiments in 
+# GameState.displayed_regiments and identifies the closest point to each 
+# regiment's CollisionShape2D. If the distance from the mouse_position to the 
+# closest point is under the snap threshold, returns the closest point, 
+# otherwise returns the original mouse_position.
+#
+# Behavior:
+# - When cursor is outside a regiment: snaps to the closest point on the 
+#	rectangle perimeter
+# - When cursor is inside a regiment: snaps to the closest edge while maintaining 
+#	position along the parallel axis
+# - Ignores the currently selected regiment to prevent self-targeting
+# - Respects the GameSettings.barrage_hud_regiment_snap toggle
+func snap_cursor(mouse_position:Vector2) -> SnapCursorBundle:
+	# Initialize with snap distance threshold and default to original mouse position
+	var closest_distance = GameSettings.SNAP_DISTANCE_PX
+	var closest_bundle: SnapCursorBundle = SnapCursorBundle.new()
+	closest_bundle.snap_point = mouse_position
+	closest_bundle.regiment = null
+	
+	# Early exit if regiment snapping is disabled in settings
+	if not GameSettings.hud_regiment_snap:
+		return closest_bundle
+	
+	# Iterate through all displayed regiments to find the best snap target
+	for regiment_display in GameState.displayed_regiments:
+		# Skip null regiments
+		if regiment_display == null:
+			continue
+			
+		# Skip the currently selected regiment to prevent self-targeting
+		if regiment_display.regiment == GameState.selected_regiment:
+			continue
+		
+		# Get the regiment's collision shape for hit detection
+		var collision_shape = regiment_display.get_node("MouseHoverArea/CollisionShape2D")
+		
+		# Skip regiments without valid collision shapes
+		if collision_shape == null or collision_shape.shape == null:
+			continue
+			
+		var shape = collision_shape.shape
+		# Transform mouse position from world space to regiment's local coordinate frame
+		var regiment_transform = regiment_display.get_transform()
+		var local_mouse_pos = regiment_transform.affine_inverse() * mouse_position
+		
+		var shape_closest_point = Vector2.ZERO
+		var arc_closest_point = Regiment.ARC.INSIDE
+		# Handle rectangular collision shapes (the expected type for regiments)
+		if shape is RectangleShape2D:
+			arc_closest_point = regiment_display.regiment.determine_which_arc(local_mouse_pos)
+			
+			var rect_shape = shape as RectangleShape2D
+			var half_size = rect_shape.size * 0.5
+			
+			# Determine if mouse cursor is inside the rectangle bounds
+			var is_inside = abs(local_mouse_pos.x) <= half_size.x and abs(local_mouse_pos.y) <= half_size.y
+			
+			if arc_closest_point == Regiment.ARC.INSIDE:
+				# When inside: find the closest edge and snap to it
+				# Calculate distance from cursor to each of the four edges
+				var dist_to_left = abs(local_mouse_pos.x + half_size.x)
+				var dist_to_right = abs(local_mouse_pos.x - half_size.x)
+				var dist_to_top = abs(local_mouse_pos.y + half_size.y)
+				var dist_to_bottom = abs(local_mouse_pos.y - half_size.y)
+				
+				# Find which edge is closest
+				var min_dist = min(min(dist_to_left, dist_to_right), min(dist_to_top, dist_to_bottom))
+				
+				# Snap to the closest edge while preserving position along the parallel axis
+				if min_dist == dist_to_left:
+					arc_closest_point = Regiment.ARC.LEFT
+					shape_closest_point = Vector2(-half_size.x, local_mouse_pos.y)
+				elif min_dist == dist_to_right:
+					arc_closest_point = Regiment.ARC.RIGHT
+					shape_closest_point = Vector2(half_size.x, local_mouse_pos.y)
+				elif min_dist == dist_to_top:
+					arc_closest_point = Regiment.ARC.FRONT
+					shape_closest_point = Vector2(local_mouse_pos.x, -half_size.y)
+				else:
+					arc_closest_point = Regiment.ARC.REAR
+					shape_closest_point = Vector2(local_mouse_pos.x, half_size.y)
+			else:
+				# When outside: clamp to the closest point on the rectangle perimeter
+				shape_closest_point = Vector2(
+					clamp(local_mouse_pos.x, -half_size.x, half_size.x),
+					clamp(local_mouse_pos.y, -half_size.y, half_size.y)
+				)
+		
+		# Transform the closest point back to world coordinates
+		var world_closest_point = regiment_transform * shape_closest_point
+		var distance = mouse_position.distance_to(world_closest_point)
+		
+		# Update our best snap target if this regiment is closer
+		if distance < closest_distance:
+			closest_bundle.snap_point = shape_closest_point
+			closest_bundle.arc = arc_closest_point
+			closest_bundle.regiment = regiment_display.regiment
+	
+	return closest_bundle

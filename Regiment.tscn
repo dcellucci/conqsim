@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cxuh0rxhgvalv"]
+[gd_scene load_steps=6 format=3 uid="uid://cxuh0rxhgvalv"]
 
 [ext_resource type="Script" uid="uid://bs3ey42inx1e1" path="res://regiment.gd" id="1_kun14"]
 [ext_resource type="Script" uid="uid://bewdi31vnegbk" path="res://move_regiment_ui.gd" id="2_2a25j"]
+[ext_resource type="Script" uid="uid://o0wbdi7o4gly" path="res://regiment_charge_overlay.gd" id="3_18syq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kun14"]
 
@@ -29,15 +30,25 @@ closed = true
 width = 3.0
 default_color = Color(1, 0, 0, 1)
 
-[node name="MoveRegimentUI" type="Control" parent="."]
+[node name="RegimentUI" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("2_2a25j")
 
-[node name="MarchButton" type="TextureButton" parent="MoveRegimentUI"]
+[node name="MarchButton" type="TextureButton" parent="RegimentUI"]
 layout_mode = 0
 offset_right = 10.0
 offset_bottom = 10.0
 texture_normal = SubResource("PlaceholderTexture2D_kun14")
+
+[node name="ReformButton" type="TextureButton" parent="RegimentUI"]
+layout_mode = 0
+offset_right = 10.0
+offset_bottom = 10.0
+texture_normal = SubResource("PlaceholderTexture2D_kun14")
+
+[node name="ChargeHUD" type="Node2D" parent="."]
+z_index = 2
+script = ExtResource("3_18syq")

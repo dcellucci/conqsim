@@ -3,16 +3,19 @@ extends VBoxContainer
 
 func _ready() -> void:
 	$HBoxContainer/MoveRegimentButton.pressed.connect(
-		set_regiment_state.bind(GameState.Regiment.UIState.MOVE)
+		UiStateMachine.ui_state_machine.set_new_state.bind(
+			UiStateMachine.UIState.MOVE_INITIALIZE
+		)
 	)
 	$HBoxContainer/ChargeRegimentButton.pressed.connect(
-		set_regiment_state.bind(GameState.Regiment.UIState.CHARGE)
+		UiStateMachine.ui_state_machine.set_new_state.bind(
+			UiStateMachine.UIState.CHARGE_INITIALIZE
+		)
 	)
 	$HBoxContainer/BarrageButton.pressed.connect(
-		set_regiment_state.bind(GameState.Regiment.UIState.BARRAGE)
+		UiStateMachine.ui_state_machine.set_new_state.bind(
+			UiStateMachine.UIState.BARRAGE_LOS
+		)
 	)
 	
-# Generic set state function (so we dont have a bunch of one-off functions for 
-# what is the same process over and over
-func set_regiment_state(new_state: GameState.Regiment.UIState):
-	GameState.selected_regiment_state = GameState.Regiment.UIState.MOVE
+	
