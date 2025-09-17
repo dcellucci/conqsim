@@ -27,7 +27,7 @@ func update_ui_visibility() -> void:
 	$ChargeHUD.visible = (
 		GameState.selected_regiment == regiment and 
 		UiStateMachine.ui_state_machine.is_charge_state() and 
-		!GameSettings.charge_hud_measure_mode
+		not UiStateMachine.ui_state_machine.is_charge_measure_state()
 		) 
 	$RegimentUI.visible = (GameState.selected_regiment == regiment and 
 		( UiStateMachine.ui_state_machine.is_charge_state() or 
@@ -43,7 +43,9 @@ func update_ui_visibility() -> void:
 		  ] 
 		or UiStateMachine.ui_state_machine.is_reform_state()
 	)
-	$RegimentUI/ReformButton.disabled = (UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_REFORM_ROTATE)
+	$RegimentUI/ReformButton.disabled = (
+		UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_REFORM_ROTATE
+		)
 
 	
 func process_mode() -> void:
@@ -53,7 +55,6 @@ func process_mode() -> void:
 	# We do nothing further if the selected regiment isn't this regiment
 	if GameState.selected_regiment != regiment:
 		return
-			
 	match UiStateMachine.ui_state_machine.state:
 		UiStateMachine.UIState.CHARGE_REFORM_ROTATE:
 			process_reform()	
@@ -96,11 +97,14 @@ func process_charge_target():
 	# the offset is always going to be the half-height of self.regiment- the direction
 	# comes from the unit vector between the center of the target regiment and the
 	# midpoint of the arc thats being contacted.
-	#print(cursor_bundle)
+	#print(cursor_bundle)		
+	$ChargeHUD.visible = false
+	$RegimentUI/ReformButton.visible = false
 	if cursor_bundle.regiment == null:
 		GameState.selected_regiment.position = GameState.regiment_starting_position
 		GameState.selected_regiment.rotation = GameState.regiment_starting_rotation
 		$ChargeHUD.visible = true
+		$RegimentUI/ReformButton.visible = true
 		return
 		
 	var normal = Vector2(0.0, -1.0)
@@ -178,14 +182,12 @@ func _handle_mouse_leave_hover_area():
 		GameState.hovered_regiment = null
 
 func _handle_reform_button_pressed():
-	# We will want to store the previous regiment state so we can
-	# go back to it (i.e. dont assume that we go back to NONE, maybe it's CHARGE_SELECT_TARGET)
+	print("caught")
 	if regiment == null:
 		return
 	reform_base_rotation_degrees = regiment.rotation
 	reform_base_position = regiment.position
 	reform_base_mouse_click_location = get_global_mouse_position()
-	
 	UiStateMachine.ui_state_machine.set_new_state(UiStateMachine.UIState.CHARGE_REFORM_ROTATE)
 	GameSettings.charge_hud_measure_mode = false
 	debounce_timestamp = Time.get_ticks_msec()

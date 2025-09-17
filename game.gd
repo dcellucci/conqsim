@@ -45,6 +45,9 @@ func _ready():
 func _process(delta: float) -> void:
 	if UiStateMachine.ui_state_machine.state != UiStateMachine.UIState.NONE:
 		return
+	var mouse_pos = get_global_mouse_position()
+	if mouse_pos.x < GameSettings.sidebar_width_px or mouse_pos.x > (GameSettings.window_width_px - GameSettings.sidebar_width_px):
+		return
 	if Input.is_action_just_pressed('SelectRegiment'):
 		GameState.selected_regiment = GameState.hovered_regiment
 	

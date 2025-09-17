@@ -21,6 +21,10 @@ GameState="*res://game_state.gd"
 GameSettings="*res://game_settings.gd"
 UiStateMachine="*res://ui_state_machine.gd"
 
+[debug]
+
+settings/stdout/verbose_stdout=true
+
 [display]
 
 window/size/viewport_width=1920

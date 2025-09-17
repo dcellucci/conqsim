@@ -54,9 +54,9 @@ class UIStateMachine:
 		match state:
 			UIState.CHARGE_MEASURE_FREE:
 				set_new_state(UIState.CHARGE_MEASURE_SNAP_REGIMENT)
-			UIState.CHARGE_MEASURE_FREE:
+			UIState.CHARGE_MEASURE_SNAP_REGIMENT:
 				set_new_state(UIState.CHARGE_MEASURE_SNAP_FACE)
-			UIState.CHARGE_MEASURE_FREE:
+			UIState.CHARGE_MEASURE_SNAP_FACE:
 				set_new_state(UIState.CHARGE_MEASURE_FREE)
 		
 	func undo_state():
@@ -67,4 +67,30 @@ class UIStateMachine:
 		state = UIState.NONE
 		previous_state = UIState.NONE
 	
-	
+	func get_state_string() -> String:
+		match state:
+			UIState.NONE:
+				return "None"
+			UIState.CHARGE_INITIALIZE:
+				return "Charge Initialize"
+			UIState.CHARGE_MEASURE_FREE:
+				return "Charge Measure Free"
+			UIState.CHARGE_MEASURE_SNAP_REGIMENT:
+				return "Charge Measure Snap Regiment"
+			UIState.CHARGE_MEASURE_SNAP_FACE:
+				return "Charge Measure Snap Face"
+			UIState.CHARGE_TARGET:
+				return "Charge Target"
+			UIState.CHARGE_REFORM_ROTATE:
+				return "Charge Reform Rotate"
+			UIState.CHARGE_FRONTAGE:
+				return "Charge Frontage"
+			UIState.REFORM_ROTATE:
+				return "Reform Rotate"
+			UIState.MOVE_INITIALIZE:
+				return "Move Initialize"
+			UIState.BARRAGE_LOS:
+				return "Barrage Line of Sight"
+			UIState.BARRAGE_RANGE:
+				return "Barrage Range"
+		return "Unknown State"
