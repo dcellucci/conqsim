@@ -75,49 +75,62 @@ func process_charge_measure():
 		$Line2D.visible = false
 	
 func charge_measure_get_target_position(mouse_position: Vector2, front_segment) -> PackedVector2Array:
+	# Get current UI state to determine which charge measurement mode we're in
 	var uistate = UiStateMachine.ui_state_machine.state
+	# Check if cursor should snap to nearby regiments and get snap information
 	var snap_bundle = GameState.snap_cursor(mouse_position)
-	
+
+	# Transform snap point to global coordinates if we have a regiment to snap to
 	var global_snap_point = snap_bundle.snap_point
 	if snap_bundle.regiment != null:
 		global_snap_point = snap_bundle.regiment.get_transform().affine_inverse()*snap_bundle.snap_point
-	
+
+	# Convert the selected regiment's front segment to global coordinates
 	var global_front_segment = [
 		GameState.selected_regiment.get_transform()*front_segment[0]
 	  , GameState.selected_regiment.get_transform()*front_segment[-1]
 	  ]
-	
-	
+
+	# Handle free measurement mode or face snapping mode (or when no regiment to snap to)
 	if uistate in [UiStateMachine.UIState.CHARGE_MEASURE_FREE, UiStateMachine.UIState.CHARGE_MEASURE_SNAP_FACE] or \
 		snap_bundle.regiment == null:
+		# Default to mouse position, but use snap point if in face snap mode
 		var target_position = mouse_position
 		if uistate == UiStateMachine.UIState.CHARGE_MEASURE_SNAP_FACE and snap_bundle.regiment != null:
 			target_position = global_snap_point
+		# Find closest point on our front segment to the target position
 		var closest_point = Geometry2D.get_closest_point_to_segment(
 			target_position, global_front_segment[0], global_front_segment[-1]
 			)
 		return PackedVector2Array([closest_point, target_position])
-	
+
+	# Handle regiment snapping mode - find shortest path between regiment edges
 	if uistate == UiStateMachine.UIState.CHARGE_MEASURE_SNAP_REGIMENT :
 		var minimum_dist = -1
 		var closest_points: PackedVector2Array
+		# Check all four sides of the target regiment to find the shortest connection
 		for arc in [
 			GameState.Regiment.ARC.FRONT, GameState.Regiment.ARC.LEFT
-		  , GameState.Regiment.ARC.RIGHT, GameState.Regiment.ARC.REAR 
+		  , GameState.Regiment.ARC.RIGHT, GameState.Regiment.ARC.REAR
 		  ]:
+			# Get the segment for this side of the target regiment
 			var target_segment = snap_bundle.regiment.stand_segments(arc)
+			# Find closest points between our front segment and this target segment
 			var candidate_closest_points = Geometry2D.get_closest_points_between_segments(
 				GameState.selected_regiment.get_transform()*front_segment[0]
 			  , GameState.selected_regiment.get_transform()*front_segment[-1]
 			  , snap_bundle.regiment.get_transform()*target_segment[0]
 			  , snap_bundle.regiment.get_transform()*target_segment[-1]
 			)
+			# Calculate distance between the closest points
 			var candidate_closest_point_distance = candidate_closest_points[0].distance_to(candidate_closest_points[1])
+			# Keep track of the shortest distance found so far
 			if minimum_dist == -1 or candidate_closest_point_distance < minimum_dist:
 				closest_points = candidate_closest_points
 				minimum_dist = candidate_closest_point_distance
 		return closest_points
-		
+
+	# Fallback: return empty array if no valid state
 	return PackedVector2Array([])
 	
 func cycle_snap_mode():
