@@ -69,19 +69,10 @@ func process_charge_measure():
 	if mouse_arc != GameState.Regiment.ARC.FRONT:
 		$Line2D.default_color = Color(1.0, 0, 0)
 	
-	'''
-	var global_front_segment = [
-		  GameState.selected_regiment.get_transform()*front_segment[0]
-		, GameState.selected_regiment.get_transform()*front_segment[-1]
-		]
-		
-	var closest_point_selected_regiment = Geometry2D.get_closest_point_to_segment(
-		  mouse_position
-		, global_front_segment[0]
-		, global_front_segment[-1]
-		)
-	'''
-	$Line2D.points = [line_points[0], line_points[1]]
+	if len(line_points) > 0:
+		$Line2D.points = [line_points[0], line_points[-1]]
+	else:
+		$Line2D.visible = false
 	
 func charge_measure_get_target_position(mouse_position: Vector2, front_segment) -> PackedVector2Array:
 	var uistate = UiStateMachine.ui_state_machine.state
@@ -90,14 +81,22 @@ func charge_measure_get_target_position(mouse_position: Vector2, front_segment) 
 	var global_snap_point = snap_bundle.snap_point
 	if snap_bundle.regiment != null:
 		global_snap_point = snap_bundle.regiment.get_transform().affine_inverse()*snap_bundle.snap_point
+	
 	var global_front_segment = [
-		GameState.selected_regiment.get_transform().affine_inverse()*front_segment[0]
-	  , GameState.selected_regiment.get_transform().affine_inverse()*front_segment[-1]
+		GameState.selected_regiment.get_transform()*front_segment[0]
+	  , GameState.selected_regiment.get_transform()*front_segment[-1]
 	  ]
+	
+	
 	if uistate in [UiStateMachine.UIState.CHARGE_MEASURE_FREE, UiStateMachine.UIState.CHARGE_MEASURE_SNAP_FACE] or \
 		snap_bundle.regiment == null:
-		var closest_point = Geometry2D.get_closest_point_to_segment(global_snap_point, global_front_segment[0], global_front_segment[-1])
-		return PackedVector2Array([closest_point, global_snap_point])
+		var target_position = mouse_position
+		if uistate == UiStateMachine.UIState.CHARGE_MEASURE_SNAP_FACE and snap_bundle.regiment != null:
+			target_position = global_snap_point
+		var closest_point = Geometry2D.get_closest_point_to_segment(
+			target_position, global_front_segment[0], global_front_segment[-1]
+			)
+		return PackedVector2Array([closest_point, target_position])
 	
 	if uistate == UiStateMachine.UIState.CHARGE_MEASURE_SNAP_REGIMENT :
 		var minimum_dist = -1
@@ -108,16 +107,17 @@ func charge_measure_get_target_position(mouse_position: Vector2, front_segment) 
 		  ]:
 			var target_segment = snap_bundle.regiment.stand_segments(arc)
 			var candidate_closest_points = Geometry2D.get_closest_points_between_segments(
-				GameState.selected_regiment.get_transform().affine_inverse()*front_segment[0]
-			  , GameState.selected_regiment.get_transform().affine_inverse()*front_segment[-1]
-			  , snap_bundle.regiment.get_transform().affine_inverse()*target_segment[0]
-			  , snap_bundle.regiment.get_transform().affine_inverse()*target_segment[-1]
+				GameState.selected_regiment.get_transform()*front_segment[0]
+			  , GameState.selected_regiment.get_transform()*front_segment[-1]
+			  , snap_bundle.regiment.get_transform()*target_segment[0]
+			  , snap_bundle.regiment.get_transform()*target_segment[-1]
 			)
 			var candidate_closest_point_distance = candidate_closest_points[0].distance_to(candidate_closest_points[1])
 			if minimum_dist == -1 or candidate_closest_point_distance < minimum_dist:
 				closest_points = candidate_closest_points
 				minimum_dist = candidate_closest_point_distance
 		return closest_points
+		
 	return PackedVector2Array([])
 	
 func cycle_snap_mode():
