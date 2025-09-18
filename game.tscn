@@ -99,3 +99,12 @@ polygon = PackedVector2Array(-1, -1, 1, -1, 1, 1, -1, 1)
 
 [node name="Line2D" type="Line2D" parent="BoardHUDManager/ChargeHUD"]
 points = PackedVector2Array(0, 0, 0, 0)
+
+[node name="Panel" type="Panel" parent="BoardHUDManager/ChargeHUD"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DistanceDisplay" type="Label" parent="BoardHUDManager/ChargeHUD/Panel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0

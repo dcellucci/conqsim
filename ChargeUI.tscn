@@ -16,6 +16,7 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="InfoText" type="Label" parent="."]
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 text = "Select a Target"
 horizontal_alignment = 1
@@ -36,10 +37,9 @@ text = "Move Speed (in)"
 layout_mode = 2
 rounded = true
 
-[node name="SnapToRegimentCheckButton" type="CheckButton" parent="."]
+[node name="CycleMeasureModeButton" type="Button" parent="."]
 layout_mode = 2
-text = "SnapToRegiment
-"
+text = "Snap to regiment (space)"
 
 [node name="MeasureModeToggleButton" type="Button" parent="."]
 layout_mode = 2
