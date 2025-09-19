@@ -55,6 +55,11 @@ func process_mode() -> void:
 	# We do nothing further if the selected regiment isn't this regiment
 	if GameState.selected_regiment != regiment:
 		return
+	if UiStateMachine.ui_state_machine.is_charge_measure_state():
+		if GameState.selected_regiment.position != GameState.regiment_starting_position:
+			GameState.selected_regiment.position = GameState.regiment_starting_position
+		if GameState.selected_regiment.rotation != GameState.regiment_starting_rotation:
+			GameState.selected_regiment.rotation = GameState.regiment_starting_rotation
 	match UiStateMachine.ui_state_machine.state:
 		UiStateMachine.UIState.CHARGE_REFORM_ROTATE:
 			process_reform()	
@@ -64,6 +69,7 @@ func process_mode() -> void:
 			process_charge_target()
 		UiStateMachine.UIState.CHARGE_FRONTAGE:
 			process_charge_frontage()
+	
 	
 
 func process_move() -> void:
