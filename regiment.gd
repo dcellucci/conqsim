@@ -26,8 +26,10 @@ func update_ui_visibility() -> void:
 	$StandTray/StandSelectedBorder.visible = (GameState.selected_regiment == regiment) 
 	$ChargeHUD.visible = (
 		GameState.selected_regiment == regiment and 
-		UiStateMachine.ui_state_machine.is_charge_state() and 
-		not UiStateMachine.ui_state_machine.is_charge_measure_state()
+		UiStateMachine.ui_state_machine.state in [
+			UiStateMachine.UIState.CHARGE_TARGET
+		  , UiStateMachine.UIState.CHARGE_REFORM_ROTATE
+		  ]
 		) 
 	$RegimentUI.visible = (GameState.selected_regiment == regiment and 
 		( UiStateMachine.ui_state_machine.is_charge_state() or 
@@ -56,10 +58,14 @@ func process_mode() -> void:
 	if GameState.selected_regiment != regiment:
 		return
 	if UiStateMachine.ui_state_machine.is_charge_measure_state():
+		# Reset the regiment position and rotation to the starting position 
+		# When you start doing the measuring
+		# TODO: This will not work if you then need to reform.
 		if GameState.selected_regiment.position != GameState.regiment_starting_position:
 			GameState.selected_regiment.position = GameState.regiment_starting_position
 		if GameState.selected_regiment.rotation != GameState.regiment_starting_rotation:
 			GameState.selected_regiment.rotation = GameState.regiment_starting_rotation
+	
 	match UiStateMachine.ui_state_machine.state:
 		UiStateMachine.UIState.CHARGE_REFORM_ROTATE:
 			process_reform()	
@@ -147,7 +153,10 @@ func process_charge_frontage():
 	var local_point = Geometry2D.get_closest_point_to_segment_uncapped(local_mouse_position, stand_segments[0], stand_segments[-1])
 	var offset = local_point.distance_to(stand_midpoint)
 	var angle = (local_point-stand_midpoint).angle_to(stand_segments[0]-stand_midpoint)
-	var displace_vector = Vector2(1.0,0.0).rotated(angle)*clamp(offset, -max_offset, max_offset)
+	var displace_vector_factor:float = clamp(offset, -max_offset, max_offset)
+	if GameState.charge_snap_frontage:
+		displace_vector_factor = snapped(displace_vector_factor, GameSettings.STAND_DIM_PX)
+	var displace_vector = Vector2(1.0,0.0).rotated(angle)*displace_vector_factor
 	if GameState.charge_selected_arc in [GameState.Regiment.ARC.LEFT, GameState.Regiment.ARC.REAR]:
 		displace_vector = -displace_vector
 	GameState.selected_regiment.position = GameState.charge_target_initial_transform*displace_vector

@@ -29,6 +29,8 @@ var displayed_regiments: Array[Node]
 var charge_selected_arc: Regiment.ARC
 var charge_targeted_regiment: Regiment
 var charge_target_initial_transform:Transform2D
+# Snap frontage to the nearest stand
+var charge_snap_frontage: bool
 
 class InterimGameState:
 	# Each interim game state is assigned a modification type purely for the 

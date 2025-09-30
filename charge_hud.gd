@@ -9,6 +9,7 @@ var input_debounce_ticks_ms: int = 0
 func _process(_delta: float) -> void:
 	$GhostRegiment.visible = UiStateMachine.ui_state_machine.is_charge_state()
 	$Line2D.visible = UiStateMachine.ui_state_machine.is_charge_measure_state()
+	$DistanceDisplayPanel.visible = UiStateMachine.ui_state_machine.is_charge_measure_state()
 	if not UiStateMachine.ui_state_machine.is_charge_state():
 		return
 		
@@ -73,6 +74,12 @@ func process_charge_measure():
 		$Line2D.points = [line_points[0], line_points[-1]]
 	else:
 		$Line2D.visible = false
+		return
+	var distance = line_points[0].distance_to(line_points[-1])/GameSettings.PIXELS_PER_INCH
+	$DistanceDisplayPanel/DistanceDisplayLabel.text = str(snapped(distance,0.1))
+	$DistanceDisplayPanel.position = mouse_position-Vector2($DistanceDisplayPanel.size.x,0)
+	
+	
 	
 func charge_measure_get_target_position(mouse_position: Vector2, front_segment) -> PackedVector2Array:
 	# Get current UI state to determine which charge measurement mode we're in

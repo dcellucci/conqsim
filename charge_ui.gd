@@ -33,16 +33,22 @@ func update_display():
 	if GameState.selected_regiment == null:
 		return
 	# Display different text based on the barrage mode we are currently in
-	if UiStateMachine.ui_state_machine.is_charge_measure_state():
-		$MeasureModeToggleButton.text = "Switch to Overlay Mode (Tab)"
-	else: 
-		$MeasureModeToggleButton.text = "Switch to Measure Mode (Tab)"
+	if UiStateMachine.ui_state_machine.state != UiStateMachine.UIState.CHARGE_FRONTAGE:
+		$MeasureModeToggleButton.visible = true
+		if UiStateMachine.ui_state_machine.is_charge_measure_state():
+			$MeasureModeToggleButton.text = "Switch to Overlay Mode (Tab)"
+		else: 
+			$MeasureModeToggleButton.text = "Switch to Measure Mode (Tab)"
+	else:
+		$MeasureModeToggleButton.visible = false
 		
 	# The Spinbox range value should match the selected regiment's barrage range
 	# The move box should only be visible if we are in charge state but we 
 	# also aren't in a charge measure mode
-	$MoveSpinRow.visible = (UiStateMachine.ui_state_machine.is_charge_state() 
-		and not UiStateMachine.ui_state_machine.is_charge_measure_state())
+	$MoveSpinRow.visible = (UiStateMachine.ui_state_machine.state in [
+		UiStateMachine.UIState.CHARGE_TARGET
+	  , UiStateMachine.UIState.CHARGE_REFORM_ROTATE
+	  ])
 	$MoveSpinRow/MoveSpinBox.value = GameState.selected_regiment.move
 	
 	# The check button value for fluid formation should likewise match the 
