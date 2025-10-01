@@ -13,8 +13,7 @@ func _ready():
 func _process(delta: float):
 	process_input()
 	update_display()
-	
-	
+
 func process_input():
 	# Escape clause to process user input only if the current UI state is
 	# the barrage state
@@ -105,7 +104,14 @@ func cycle_charge_measure_mode():
 	UiStateMachine.ui_state_machine.cycle_charge_measure_state()
 
 func cancel_charge_mode():
+	# Charge target mode is the "root" mode for the charge ui, if we are cancelling
+	# and we are in this state, that means we want to cancel charging entirely
 	if UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_TARGET:
+		# first Reset regiment position and rotation back to starting values
+		GameState.selected_regiment.position = GameState.regiment_starting_position
+		GameState.selected_regiment.rotation = GameState.regiment_starting_rotation
+		# then Go back to the selection menu
 		UiStateMachine.ui_state_machine.cancel_state()
+	# otherwise, we are just going back to the root UI state: charge target
 	else:
 		UiStateMachine.ui_state_machine.set_new_state(UiStateMachine.UIState.CHARGE_TARGET)
