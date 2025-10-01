@@ -31,6 +31,10 @@ class UIStateMachine:
 						, UIState.CHARGE_MEASURE_SNAP_REGIMENT
 						, UIState.CHARGE_MEASURE_SNAP_FACE
 						]
+	func is_charge_hud_state():
+		return state in [ UIState.CHARGE_TARGET
+						, UIState.CHARGE_REFORM_ROTATE
+						]
 							
 	func is_idle():
 		return state == UIState.NONE

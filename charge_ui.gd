@@ -6,6 +6,7 @@ func _ready():
 	# Then connect up all of the signals with the update functions
 	$MoveSpinRow/MoveSpinBox.value_changed.connect(update_regiment_charge_range)
 	$CycleMeasureModeButton.toggled.connect(cycle_charge_measure_mode)
+	$SnapToStandButton.toggled.connect(toggle_frontage_snap)
 	$MeasureModeToggleButton.pressed.connect(toggle_measure_mode)
 	$CancelButton.pressed.connect(cancel_charge_mode)
 	
@@ -19,14 +20,19 @@ func process_input():
 	# the barrage state
 	if not UiStateMachine.ui_state_machine.is_charge_state():
 		return
-		
+	
+	# Toggle mode keypress changes based on the point in the flow we are in
 	if Input.is_action_just_pressed('UIToggleMode'):
-		toggle_measure_mode()
+		if UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_FRONTAGE:
+			toggle_frontage_snap(!GameState.charge_snap_frontage)
+		else:
+			toggle_measure_mode()
 	if Input.is_action_just_pressed('UIIncreaseValue'):
 		GameState.selected_regiment.barrage_range = GameState.selected_regiment.barrage_range + 1
 	if Input.is_action_just_pressed('UIDecreaseValue'):
 		GameState.selected_regiment.barrage_range = GameState.selected_regiment.barrage_range - 1
-	
+	if Input.is_action_just_pressed('ui_cancel'):
+		cancel_charge_mode()
 	
 func update_display():
 	# Escape clause in case selected regiment has no data
@@ -42,13 +48,13 @@ func update_display():
 	else:
 		$MeasureModeToggleButton.visible = false
 		
+	# Snap to Stand Button should only be visible when we are determining frontage
+	$SnapToStandButton.visible = (UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_FRONTAGE)
+	$SnapToStandButton.button_pressed = GameState.charge_snap_frontage
 	# The Spinbox range value should match the selected regiment's barrage range
 	# The move box should only be visible if we are in charge state but we 
 	# also aren't in a charge measure mode
-	$MoveSpinRow.visible = (UiStateMachine.ui_state_machine.state in [
-		UiStateMachine.UIState.CHARGE_TARGET
-	  , UiStateMachine.UIState.CHARGE_REFORM_ROTATE
-	  ])
+	$MoveSpinRow.visible = UiStateMachine.ui_state_machine.is_charge_hud_state()
 	$MoveSpinRow/MoveSpinBox.value = GameState.selected_regiment.move
 	
 	# The check button value for fluid formation should likewise match the 
@@ -84,10 +90,8 @@ func update_regiment_charge_range(value: float):
 		if displayed_regiment.regiment == GameState.selected_regiment:
 			displayed_regiment.update_display()
 
-func update_cursor_regiment_snap_setting(toggled_on: bool):
-	# match the snap setting to the current value output by the check box
-	# toggled signal
-	GameSettings.hud_regiment_snap = toggled_on
+func toggle_frontage_snap(toggled_on: bool):
+	GameState.charge_snap_frontage = toggled_on
 	
 func toggle_measure_mode():
 	if UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_REFORM_ROTATE:
@@ -101,4 +105,7 @@ func cycle_charge_measure_mode():
 	UiStateMachine.ui_state_machine.cycle_charge_measure_state()
 
 func cancel_charge_mode():
-	UiStateMachine.ui_state_machine.cancel_state()
+	if UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_TARGET:
+		UiStateMachine.ui_state_machine.cancel_state()
+	else:
+		UiStateMachine.ui_state_machine.set_new_state(UiStateMachine.UIState.CHARGE_TARGET)

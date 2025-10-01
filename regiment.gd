@@ -26,10 +26,7 @@ func update_ui_visibility() -> void:
 	$StandTray/StandSelectedBorder.visible = (GameState.selected_regiment == regiment) 
 	$ChargeHUD.visible = (
 		GameState.selected_regiment == regiment and 
-		UiStateMachine.ui_state_machine.state in [
-			UiStateMachine.UIState.CHARGE_TARGET
-		  , UiStateMachine.UIState.CHARGE_REFORM_ROTATE
-		  ]
+		UiStateMachine.ui_state_machine.is_charge_hud_state()
 		) 
 	$RegimentUI.visible = (GameState.selected_regiment == regiment and 
 		( UiStateMachine.ui_state_machine.is_charge_state() or 
