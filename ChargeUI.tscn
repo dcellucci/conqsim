@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://b6x83uxapckfr" path="res://charge_ui.gd" id="1_wyj16"]
 
 [node name="ChargeMenu" type="VBoxContainer"]
+visible = false
 offset_right = 110.0
 offset_bottom = 23.0
 script = ExtResource("1_wyj16")

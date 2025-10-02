@@ -49,15 +49,15 @@ func update_display():
 		
 	# Snap to Stand Button should only be visible when we are determining frontage
 	$SnapToStandButton.visible = (UiStateMachine.ui_state_machine.state == UiStateMachine.UIState.CHARGE_FRONTAGE)
+	# The toggle state of the button should match the current gamestate flag value for snap to stand 
 	$SnapToStandButton.button_pressed = GameState.charge_snap_frontage
-	# The Spinbox range value should match the selected regiment's barrage range
-	# The move box should only be visible if we are in charge state but we 
-	# also aren't in a charge measure mode
+	
+	# The Spinbox range value should match the selected regiment's move value
+	# The move box should only be visible if we are in a state where the charge hud would
+	# be present
 	$MoveSpinRow.visible = UiStateMachine.ui_state_machine.is_charge_hud_state()
 	$MoveSpinRow/MoveSpinBox.value = GameState.selected_regiment.move
 	
-	# The check button value for fluid formation should likewise match the 
-	# selected regiment
 	$CycleMeasureModeButton.visible = UiStateMachine.ui_state_machine.is_charge_measure_state()
 	match UiStateMachine.ui_state_machine.state:
 		UiStateMachine.UIState.CHARGE_MEASURE_SNAP_FACE:
